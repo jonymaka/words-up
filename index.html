@@ -123,23 +123,7 @@
           <h2>📚 单元进度</h2>
           <button class="link-btn" data-view="cards">查看单词 →</button>
         </div>
-        <div class="unit-progress-list">
-          <div class="unit-progress">
-            <div class="up-top"><span class="grade-badge g7">七上</span><span class="up-name">Unit 1 · Making Friends</span><span class="up-rate">60%</span></div>
-            <div class="bar"><i style="width:60%"></i></div>
-            <small>已学 18 / 30 词 · 掌握 85%</small>
-          </div>
-          <div class="unit-progress">
-            <div class="up-top"><span class="grade-badge g7">七上</span><span class="up-name">Unit 2 · School Life</span><span class="up-rate">33%</span></div>
-            <div class="bar"><i style="width:33%"></i></div>
-            <small>已学 10 / 30 词 · 掌握 70%</small>
-          </div>
-          <div class="unit-progress">
-            <div class="up-top"><span class="grade-badge g8">八上</span><span class="up-name">Unit 1 · Vacation</span><span class="up-rate">0%</span></div>
-            <div class="bar"><i style="width:4%"></i></div>
-            <small>尚未开始 · 30 词</small>
-          </div>
-        </div>
+        <div class="unit-progress-list" id="unitProgressList"></div>
       </div>
 
       <!-- 打卡与成就 -->
@@ -171,15 +155,8 @@
 
     <div class="cards-layout">
       <div class="card unit-panel">
-        <div class="seg-tabs" id="gradeTabs">
-          <button class="seg active" data-grade="g7">七年级上</button>
-          <button class="seg" data-grade="g8">八年级上</button>
-        </div>
-        <div class="seg-tabs units" id="unitTabs">
-          <button class="seg active" data-unit="u1">Unit 1</button>
-          <button class="seg" data-unit="u2">Unit 2</button>
-          <button class="seg" data-unit="u3">Unit 3</button>
-        </div>
+        <div class="seg-tabs" id="gradeTabs"></div>
+        <div class="seg-tabs units" id="unitTabs"></div>
         <ul class="word-list" id="wordList"></ul>
       </div>
 
@@ -467,7 +444,27 @@
         </div>
         <div class="import-status" id="importStatus"></div>
 
+        <div class="card-head mt"><h2>🎓 年级与单元管理</h2></div>
+        <p class="sub">管理你的词库结构：先建年级（如七年级上），再在年级下建单元（如 Unit 1）。</p>
+        <div class="bank-grades" id="bankGrades"></div>
+        <div class="bank-units" id="bankUnits"></div>
+        <div class="btn-row" id="bankGradeActions">
+          <button class="btn btn-soft btn-sm" id="addGradeBtn">➕ 新增年级</button>
+          <button class="btn btn-ghost btn-sm" id="renameGradeBtn">✏️ 重命名当前年级</button>
+          <button class="btn btn-danger btn-sm" id="delGradeBtn">🗑️ 删除当前年级</button>
+        </div>
+        <div class="bank-actions" id="bankUnitActions">
+          <button class="btn btn-soft btn-sm" id="addUnitBtn">➕ 新增单元</button>
+          <button class="btn btn-ghost btn-sm" id="renameUnitBtn">✏️ 重命名当前单元</button>
+          <button class="btn btn-danger btn-sm" id="delUnitBtn">🗑️ 清空/删除当前单元</button>
+        </div>
+
         <div class="card-head mt"><h2>➕ 手动添加单词</h2></div>
+        <p class="sub">选择要加入的年级与单元，再输入单词即可（AI 会自动补全词条信息）。</p>
+        <div class="ai-target-row">
+          <select id="aiGradeSel" class="spell-input"></select>
+          <select id="aiUnitSel" class="spell-input"></select>
+        </div>
         <div class="ai-add-row">
           <input class="spell-input" id="aiWordInput" placeholder="输入一个单词，如 umbrella">
           <button class="btn btn-primary" id="aiGen">🤖 AI 自动生成</button>

@@ -591,6 +591,23 @@ body::before {
 }
 .ai-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .ai-note { font-size: 12px; color: #6f639f; margin-top: 10px; line-height: 1.5; }
+/* ---------- 年级与单元管理 ---------- */
+.bank-grades { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.bank-grades .seg { position: relative; }
+.bank-grades .seg small { display: block; font-size: 10px; font-weight: 600; opacity: .65; }
+.bank-units { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.bank-unit-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: var(--r-sm);
+  background: var(--paper); border: 1px solid var(--line);
+}
+.bank-unit-row.selected { border-color: var(--mint); background: var(--mint-soft); }
+.bank-unit-row .bu-name { flex: 1; font-weight: 700; font-size: 14px; }
+.bank-unit-row .bu-meta { color: var(--ink-3); font-size: 12px; font-weight: 600; }
+.bank-actions { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+.bank-empty { color: var(--ink-3); font-size: 13px; padding: 10px 2px; }
+.ai-target-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.ai-target-row select { flex: 1; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235d6b66' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
 .ai-gen-error {
   margin-top: 12px; padding: 12px 16px; border-radius: var(--r-sm);
   background: var(--coral-soft); color: var(--coral-deep);

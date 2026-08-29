@@ -11,25 +11,82 @@
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-  /* ---------- 示例词库（原型用） ---------- */
-  const SAMPLE = [
-    { word: "friend",   phonetic: "/frend/",           pos: "n.", posCn: "名词", meaning: "朋友；友人",                  example: "My friend is from China.",        exampleCn: "我的朋友来自中国。",       state: "mastered", wrong: 1 },
-    { word: "phone",    phonetic: "/fəʊn/",            pos: "n.", posCn: "名词", meaning: "电话；手机",                  example: "My phone number is 1234567.",    exampleCn: "我的电话号码是 1234567。",  state: "learning", wrong: 3 },
-    { word: "teacher",  phonetic: "/ˈtiːtʃə(r)/",      pos: "n.", posCn: "名词", meaning: "老师；教师",                  example: "Our English teacher is kind.",    exampleCn: "我们的英语老师很和蔼。",    state: "mastered", wrong: 0 },
-    { word: "name",     phonetic: "/neɪm/",            pos: "n.", posCn: "名词", meaning: "名字；姓名",                  example: "What's your name?",              exampleCn: "你叫什么名字？",             state: "mastered", wrong: 0 },
-    { word: "morning",  phonetic: "/ˈmɔːnɪŋ/",         pos: "n.", posCn: "名词", meaning: "早晨；上午",                  example: "Good morning, class!",           exampleCn: "同学们，早上好！",            state: "learning", wrong: 1 },
-    { word: "afternoon",phonetic: "/ˌɑːftəˈnuːn/",     pos: "n.", posCn: "名词", meaning: "下午",                        example: "We have PE in the afternoon.",    exampleCn: "我们下午上体育课。",          state: "new", wrong: 0 },
-    { word: "hello",    phonetic: "/həˈləʊ/",          pos: "int.", posCn: "感叹词", meaning: "你好",                    example: "Hello, everyone!",               exampleCn: "大家好！",                    state: "mastered", wrong: 0 },
-    { word: "goodbye",  phonetic: "/ˌɡʊdˈbaɪ/",        pos: "int.", posCn: "感叹词", meaning: "再见",                    example: "Goodbye, see you tomorrow.",     exampleCn: "再见，明天见。",              state: "learning", wrong: 2 },
-    { word: "meet",     phonetic: "/miːt/",            pos: "v.", posCn: "动词", meaning: "遇见；结识",                  example: "Nice to meet you.",              exampleCn: "很高兴认识你。",              state: "new", wrong: 0 },
-    { word: "family",   phonetic: "/ˈfæməli/",         pos: "n.", posCn: "名词", meaning: "家；家庭",                    example: "This is my family photo.",       exampleCn: "这是我的全家福。",            state: "new", wrong: 1 }
-  ];
+  /* ==========================================================
+     词库数据模型：grades(年级) > units(单元) > words(单词)
+     设计见 README §6.2；数据结构与导入/添加/设置联动
+     ========================================================== */
+  const BANK_KEY = "wup_bank_v1";
 
-  let words = [...SAMPLE];
+  function defaultBank() {
+    return {
+      version: 1,
+      name: "我的词库",
+      grades: [
+        {
+          id: "g7", name: "七年级上",
+          units: [
+            { id: "g7u1", name: "Unit 1", title: "Making Friends", words: [
+              { word: "friend",   phonetic: "/frend/",           pos: "n.", posCn: "名词", meaning: "朋友；友人",                  example: "My friend is from China.",        exampleCn: "我的朋友来自中国。",       state: "mastered", wrong: 1 },
+              { word: "phone",    phonetic: "/fəʊn/",            pos: "n.", posCn: "名词", meaning: "电话；手机",                  example: "My phone number is 1234567.",    exampleCn: "我的电话号码是 1234567。",  state: "learning", wrong: 3 },
+              { word: "teacher",  phonetic: "/ˈtiːtʃə(r)/",      pos: "n.", posCn: "名词", meaning: "老师；教师",                  example: "Our English teacher is kind.",    exampleCn: "我们的英语老师很和蔼。",    state: "mastered", wrong: 0 },
+              { word: "name",     phonetic: "/neɪm/",            pos: "n.", posCn: "名词", meaning: "名字；姓名",                  example: "What's your name?",              exampleCn: "你叫什么名字？",             state: "mastered", wrong: 0 },
+              { word: "morning",  phonetic: "/ˈmɔːnɪŋ/",         pos: "n.", posCn: "名词", meaning: "早晨；上午",                  example: "Good morning, class!",           exampleCn: "同学们，早上好！",            state: "learning", wrong: 1 },
+              { word: "afternoon",phonetic: "/ˌɑːftəˈnuːn/",     pos: "n.", posCn: "名词", meaning: "下午",                        example: "We have PE in the afternoon.",    exampleCn: "我们下午上体育课。",          state: "new", wrong: 0 },
+              { word: "hello",    phonetic: "/həˈləʊ/",          pos: "int.", posCn: "感叹词", meaning: "你好",                    example: "Hello, everyone!",               exampleCn: "大家好！",                    state: "mastered", wrong: 0 },
+              { word: "goodbye",  phonetic: "/ˌɡʊdˈbaɪ/",        pos: "int.", posCn: "感叹词", meaning: "再见",                    example: "Goodbye, see you tomorrow.",     exampleCn: "再见，明天见。",              state: "learning", wrong: 2 },
+              { word: "meet",     phonetic: "/miːt/",            pos: "v.", posCn: "动词", meaning: "遇见；结识",                  example: "Nice to meet you.",              exampleCn: "很高兴认识你。",              state: "new", wrong: 0 },
+              { word: "family",   phonetic: "/ˈfæməli/",         pos: "n.", posCn: "名词", meaning: "家；家庭",                    example: "This is my family photo.",       exampleCn: "这是我的全家福。",            state: "new", wrong: 1 }
+            ] },
+            { id: "g7u2", name: "Unit 2", title: "School Life", words: [] }
+          ]
+        },
+        {
+          id: "g8", name: "八年级上",
+          units: [
+            { id: "g8u1", name: "Unit 1", title: "Vacation", words: [] }
+          ]
+        }
+      ]
+    };
+  }
+
+  let bank = loadBank();
+  let curGradeId = bank.grades[0] ? bank.grades[0].id : "";
+  let curUnitId = bank.grades[0] && bank.grades[0].units[0] ? bank.grades[0].units[0].id : "";
   let curIdx = 0;
-  let memQueue = [...words];
+  let memQueue = [];
   let memPos = 0;
   let memDone = 0;
+
+  function loadBank() {
+    try {
+      const raw = localStorage.getItem(BANK_KEY);
+      if (raw) {
+        const b = JSON.parse(raw);
+        if (b && b.grades && Array.isArray(b.grades)) return b;
+      }
+    } catch (e) {}
+    return defaultBank();
+  }
+  function saveBank() { localStorage.setItem(BANK_KEY, JSON.stringify(bank)); }
+
+  // 定位辅助
+  function gradeOf(id) { return bank.grades.find((g) => g.id === id); }
+  function unitOf(gradeId, unitId) {
+    const g = gradeOf(gradeId);
+    return g ? g.units.find((u) => u.id === unitId) : null;
+  }
+  function currentGrade() { return gradeOf(curGradeId); }
+  function currentUnit() { return unitOf(curGradeId, curUnitId); }
+  function currentWords() {
+    const u = currentUnit();
+    return u ? u.words : [];
+  }
+  function allWords() {
+    return bank.grades.reduce((acc, g) =>
+      acc.concat(g.units.reduce((a2, u) => a2.concat(u.words), [])), []);
+  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
   /* ---------- Toast ---------- */
   let toastTimer;
@@ -84,25 +141,50 @@
     ).join("");
   })();
 
-  /* ---------- 单词本 ---------- */
-  const gradeTabs = { g7: { name: "七年级上", units: ["Unit 1", "Unit 2", "Unit 3"] }, g8: { name: "八年级上", units: ["Unit 1"] } };
-  let curGrade = "g7", curUnit = "u1";
-
+  /* ---------- 单词本：从词库动态渲染年级/单元/单词 ---------- */
+  function renderGradeTabs() {
+    $("#gradeTabs").innerHTML = bank.grades.map((g) =>
+      `<button class="seg ${g.id === curGradeId ? "active" : ""}" data-grade="${g.id}">${g.name}<small>${g.units.length} 单元</small></button>`
+    ).join("") || '<span class="bank-empty">还没有年级，请到设置页创建</span>';
+    $$("#gradeTabs .seg").forEach((b) => b.addEventListener("click", () => {
+      curGradeId = b.dataset.grade;
+      const g = gradeOf(curGradeId);
+      curUnitId = g && g.units[0] ? g.units[0].id : "";
+      curIdx = 0;
+      renderGradeTabs(); renderUnitTabs(); renderWordList();
+    }));
+  }
+  function renderUnitTabs() {
+    const g = currentGrade();
+    $("#unitTabs").innerHTML = g
+      ? g.units.map((u) =>
+          `<button class="seg ${u.id === curUnitId ? "active" : ""}" data-unit="${u.id}">${u.name}<small>${u.words.length} 词 · ${u.title || ""}</small></button>`
+        ).join("")
+      : "";
+    $$("#unitTabs .seg").forEach((b) => b.addEventListener("click", () => {
+      curUnitId = b.dataset.unit;
+      curIdx = 0;
+      renderUnitTabs(); renderWordList(); refreshMemQueue();
+    }));
+  }
   function renderWordList() {
-    $("#wordList").innerHTML = words.map((w, i) => `
+    const list = currentWords();
+    $("#wordList").innerHTML = list.map((w, i) => `
       <li><button class="word-item ${i === curIdx ? "active" : ""}" data-wi="${i}">
         <span class="state-dot ${w.state}"></span>
         <span class="w-main"><b>${w.word}</b><small>${w.phonetic}</small></span>
         <span class="pos-tag">${w.pos}</span>
-      </button></li>`).join("");
+      </button></li>`).join("") || '<li class="bank-empty">该单元还没有单词，点右上角「➕ 添加」试试</li>';
     $$(".word-item").forEach((b) => b.addEventListener("click", () => showCard(+b.dataset.wi)));
   }
-
+  function safeWords() { return currentWords(); }
   function showCard(i) {
-    curIdx = i;
-    const w = words[i];
+    const list = safeWords();
+    if (!list.length) return;
+    curIdx = ((i % list.length) + list.length) % list.length;
+    const w = list[curIdx];
     renderWordList();
-    $("#vcIndex").textContent = (i + 1) + " / " + words.length;
+    $("#vcIndex").textContent = (curIdx + 1) + " / " + list.length;
     ["vcWord", "vcWord2"].forEach((id) => ($("#" + id).textContent = w.word));
     $("#vcPhonetic").textContent = w.phonetic;
     $("#vcPos").textContent = w.pos + " " + w.posCn;
@@ -112,25 +194,20 @@
     $("#vcFlip").classList.remove("flipped");
   }
   $("#vcFlip")?.addEventListener("click", () => $("#vcFlip").classList.toggle("flipped"));
-  $("#prevCard")?.addEventListener("click", () => showCard((curIdx - 1 + words.length) % words.length));
-  $("#nextCard")?.addEventListener("click", () => showCard((curIdx + 1) % words.length));
-  $("#shuffleBtn")?.addEventListener("click", () => showCard(Math.floor(Math.random() * words.length)));
+  $("#prevCard")?.addEventListener("click", () => showCard(curIdx - 1));
+  $("#nextCard")?.addEventListener("click", () => showCard(curIdx + 1));
+  $("#shuffleBtn")?.addEventListener("click", () => showCard(Math.floor(Math.random() * Math.max(safeWords().length, 1))));
   $("#viewCard")?.addEventListener("click", (e) => {
-    if (e.target.closest(".speak-btn")) { e.stopPropagation(); speak(words[curIdx].word); }
+    if (e.target.closest(".speak-btn")) { e.stopPropagation(); const l = safeWords(); speak(l[curIdx] ? l[curIdx].word : ""); }
   });
   $$("#vcFlip .speak-btn").forEach((b) => {
-    b.addEventListener("click", (e) => { e.stopPropagation(); speak(words[curIdx].word); });
+    b.addEventListener("click", (e) => { e.stopPropagation(); const l = safeWords(); speak(l[curIdx] ? l[curIdx].word : ""); });
   });
-  $$("#gradeTabs .seg").forEach((b) => b.addEventListener("click", () => {
-    curGrade = b.dataset.grade;
-    $$("#gradeTabs .seg").forEach((s) => s.classList.toggle("active", s === b));
-  }));
-  $$("#unitTabs .seg").forEach((b) => b.addEventListener("click", () => {
-    curUnit = b.dataset.unit;
-    $$("#unitTabs .seg").forEach((s) => s.classList.toggle("active", s === b));
-  }));
-
-  /* ---------- 记忆模式 ---------- */
+  /* ---------- 记忆模式（队列来自当前选中单元的单词） ---------- */
+  function refreshMemQueue() {
+    memQueue = [...currentWords()];
+    memPos = 0; memDone = 0;
+  }
   function nextMemCard() {
     if (memPos >= memQueue.length) {
       $("#memCard").classList.add("hidden");
@@ -169,7 +246,6 @@
     memPos = 0; memDone = 0;
     nextMemCard();
   });
-  nextMemCard();
 
   /* ---------- 自测 ---------- */
   const QUIZZES = [
@@ -303,9 +379,9 @@
     fb.classList.remove("hidden");
   });
 
-  /* ---------- 错词本 ---------- */
+  /* ---------- 错词本（跨全部年级/单元汇总） ---------- */
   function renderWb() {
-    const wb = words.filter((w) => w.wrong > 0);
+    const wb = allWords().filter((w) => w.wrong > 0);
     $("#wbTotal").textContent = wb.length;
     $("#wbList").innerHTML = wb.map((w) => `
       <li class="wb-item">
@@ -314,8 +390,8 @@
         <div class="wb-meta"><span>错 ${w.wrong} 次</span><button class="icon-btn wb-del" data-word="${w.word}" title="移除">✕</button></div>
       </li>`).join("");
     $$(".wb-del").forEach((b) => b.addEventListener("click", () => {
-      const wi = words.findIndex((x) => x.word === b.dataset.word);
-      if (wi >= 0) words[wi].wrong = 0;
+      const w = allWords().find((x) => x.word === b.dataset.word);
+      if (w) w.wrong = 0;
       renderWb();
       toast("已从错词本移除");
     }));
@@ -364,7 +440,7 @@
       toast("⚠️ 请先在「设置 → AI 配置」保存 Base URL 与 API Key");
       return;
     }
-    const wrongWords = words.filter((w) => w.wrong > 0).map((w) => w.word);
+    const wrongWords = allWords().filter((w) => w.wrong > 0).map((w) => w.word);
     WordsAI.generateReport({
       learned: 320, total: 480, accuracy: 0.82, streak: 7,
       wrongWords: wrongWords, todayDone: 18, todayGoal: 30
@@ -389,7 +465,7 @@
       date: new Date().toISOString().slice(0, 10),
       report: $("#exportReport").dataset.report || "",
       learned: 320, accuracy: 0.82, streak: 7,
-      wrongWords: words.filter((w) => w.wrong > 0).map((w) => w.word)
+      wrongWords: allWords().filter((w) => w.wrong > 0).map((w) => w.word)
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
@@ -436,7 +512,13 @@
       try {
         const obj = JSON.parse(r.result);
         if (obj && obj.grades && Array.isArray(obj.grades)) {
-          showImport("✅ 导入成功！词库「" + (obj.name || "未命名") + "」已就绪", true);
+          bank = normalizeBank(obj);
+          saveBank();
+          curGradeId = bank.grades.length ? bank.grades[0].id : "";
+          curUnitId = bank.grades.length && bank.grades[0].units.length ? bank.grades[0].units[0].id : "";
+          curIdx = 0;
+          refreshAll();
+          showImport("✅ 导入成功！词库「" + (bank.name || "未命名") + "」共 " + countWords() + " 词、" + bank.grades.length + " 个年级已入库", true);
         } else {
           showImport("❌ 格式不正确：缺少 grades 字段，请检查 JSON 结构", false);
         }
@@ -451,10 +533,46 @@
     el.textContent = msg;
     el.className = "import-status " + (ok ? "ok" : "err");
   }
+
+  /* ---------- 词库归一化 / 统计 / 全局刷新 ---------- */
+  function normalizeBank(obj) {
+    const norm = { version: 1, name: obj.name || "导入词库", grades: [] };
+    (obj.grades || []).forEach((g) => {
+      const grade = { id: g.id || uid(), name: g.name || "未命名年级", units: [] };
+      (g.units || []).forEach((u) => {
+        const unit = { id: u.id || uid(), name: u.name || "未命名单元", title: u.title || "", words: [] };
+        (u.words || []).forEach((w) => {
+          if (w && w.word) {
+            unit.words.push({
+              word: String(w.word), phonetic: w.phonetic || "/?/", pos: w.pos || "n.", posCn: w.posCn || "其他",
+              meaning: w.meaning || "", example: w.example || "", exampleCn: w.exampleCn || "",
+              state: w.state || "new", wrong: Number(w.wrong) || 0
+            });
+          }
+        });
+        grade.units.push(unit);
+      });
+      if (grade.units.length || g.units) norm.grades.push(grade);
+    });
+    if (!norm.grades.length) norm.grades.push({ id: "g" + uid(), name: "默认年级", units: [{ id: "u" + uid(), name: "Unit 1", title: "", words: [] }] });
+    return norm;
+  }
+  function countWords() {
+    return allWords().length;
+  }
+  function refreshAll() {
+    renderUnitProgress(); renderGradeTabs(); renderUnitTabs(); renderWordList(); renderWb();
+    renderBankMgmt(); renderAiTarget(); carryUiSel();
+  }
   $("#loadSample")?.addEventListener("click", () => {
-    words = [...SAMPLE];
+    bank = defaultBank();
+    curGradeId = bank.grades[0].id;
+    curUnitId = bank.grades[0].units[0].id;
+    curIdx = 0;
+    saveBank();
+    renderUnitProgress(); renderGradeTabs(); renderUnitTabs(); renderWordList(); renderWb();
+    renderBankMgmt(); renderAiTarget();
     showImport("✨ 已载入内置示例词库（10 词）", true);
-    renderWordList(); renderWb();
     toast("✨ 示例词库已载入");
   });
 
@@ -522,17 +640,21 @@
     const w = $("#fWord").value.trim();
     if (!w) { toast("单词不能为空"); return; }
     const pos = $("#fPos").value.trim();
-    words.unshift({
+    const targetUnit = currentUnit();
+    if (!targetUnit) { toast("⚠️ 请先选择要加入的年级和单元"); return; }
+    const ww = {
       word: w, phonetic: $("#fPhonetic").value.trim(),
       pos: pos, posCn: POS_CN[pos] || "其他",
       meaning: $("#fMeaning").value.trim(),
       example: $("#fExample").value.trim(), exampleCn: $("#fExampleCn").value.trim(),
       state: "new", wrong: 0
-    });
+    };
+    targetUnit.words.unshift(ww);
+    saveBank();
     curIdx = 0;
     $("#aiForm").classList.add("hidden");
-    renderWordList(); renderWb();
-    toast("✅ 已保存入库：" + w);
+    renderUnitTabs(); renderWordList(); renderWb(); renderUnitProgress(); renderBankMgmt(); carryUiSel();
+    toast("✅ 已保存入库：" + w + "（" + (currentGrade() ? currentGrade().name : "") + " · " + (currentUnit() ? currentUnit().name : "") + "）");
   });
 
   // ---------- AI 配置：读取 / 保存 / 连接自检（真实） ----------
@@ -580,7 +702,7 @@
 
   // 数据管理
   $("#exportData")?.addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify({ words, progress: { learned: 320, accuracy: 0.82 } }, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(bank, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "words-up-data.json";
@@ -588,14 +710,165 @@
     toast("📄 学习数据已导出");
   });
   $("#resetData")?.addEventListener("click", () => {
-    if (confirm("确定要清空全部学习进度吗？此操作不可恢复。")) {
-      words = [...SAMPLE];
-      renderWordList(); renderWb();
-      toast("⚠️ 已重置为初始状态（原型演示）");
+    if (confirm("确定要恢复为默认示例词库吗？当前词库与进度将被覆盖。")) {
+      bank = defaultBank();
+      curGradeId = bank.grades[0].id;
+      curUnitId = bank.grades[0].units[0].id;
+      curIdx = 0;
+      saveBank();
+      renderUnitProgress(); renderGradeTabs(); renderUnitTabs(); renderWordList(); renderWb();
+      renderBankMgmt(); renderAiTarget();
+      toast("⚠️ 已恢复默认词库");
     }
   });
 
+
+  /* ==========================================================
+     年级与单元管理（设置页）+ 添加词目标下拉 + 首页进度
+     ========================================================== */
+  let mgmtGradeId = curGradeId;
+  let mgmtUnitId = curUnitId;
+  let selGradeId = curGradeId, selUnitId = curUnitId;
+
+  // 首页单元进度列表
+  function renderUnitProgress() {
+    const list = $("#unitProgressList");
+    if (!list) return;
+    list.innerHTML = bank.grades.map((g) => g.units.map((u) => {
+      const total = u.words.length;
+      const learned = u.words.filter((w) => w.state !== "new").length;
+      const rate = total ? Math.round(learned / total * 100) : 0;
+      return `<div class="unit-progress">
+        <div class="up-top"><span class="grade-badge g7">${g.name.replace("年级", "")}</span><span class="up-name">${u.name} · ${u.title || ""}</span><span class="up-rate">${rate}%</span></div>
+        <div class="bar"><i style="width:${Math.max(rate, 3)}%"></i></div>
+        <small>已学 ${learned} / ${total} 词</small>
+      </div>`;
+    }).join("")).join("") || '<span class="bank-empty">还没有年级单元，去设置页创建吧</span>';
+  }
+
+  // 添加单词：年级/单元下拉（跟随当前选中）
+  function renderAiTarget() {
+    const gs = $("#aiGradeSel"), us = $("#aiUnitSel");
+    if (!gs || !us) return;
+    gs.innerHTML = bank.grades.map((g) => `<option value="${g.id}" ${g.id === selGradeId ? "selected" : ""}>${g.name}</option>`).join("");
+    const g = gradeOf(selGradeId);
+    us.innerHTML = (g || { units: [] }).units.map((u) => `<option value="${u.id}" ${u.id === selUnitId ? "selected" : ""}>${u.name}</option>`).join("");
+    gs.onchange = () => {
+      selGradeId = gs.value; selUnitId = "";
+      renderAiTarget();
+    };
+    us.onchange = () => { selUnitId = us.value; };
+  }
+  // aiSave 时切换到下拉选中的目标（把 curGradeId/curUnitId 同步，逻辑用 currentUnit 保存）
+  function carryUiSel() {
+    if (selGradeId) curGradeId = selGradeId;
+    if (selUnitId) curUnitId = selUnitId;
+  }
+
+  // 设置页年级/单元管理
+  function renderBankMgmt() {
+    const gBox = $("#bankGrades"), uBox = $("#bankUnits");
+    if (!gBox) return;
+    gBox.innerHTML = bank.grades.map((g) =>
+      `<button class="seg ${g.id === mgmtGradeId ? "active" : ""}" data-bg="${g.id}">${g.name}<small>${g.units.length} 单元</small></button>`
+    ).join("");
+    gBox.querySelectorAll(".seg").forEach((b) => b.addEventListener("click", () => {
+      mgmtGradeId = b.dataset.bg;
+      const g = gradeOf(mgmtGradeId);
+      mgmtUnitId = g && g.units[0] ? g.units[0].id : "";
+      // 同步选择到添加词下拉与选中单元
+      selGradeId = mgmtGradeId; selUnitId = mgmtUnitId;
+      curGradeId = mgmtGradeId; curUnitId = mgmtUnitId;
+      carryUiSel();
+      renderBankMgmt(); renderAiTarget(); renderUnitTabs(); renderWordList();
+    }));
+    const g = gradeOf(mgmtGradeId);
+    uBox.innerHTML = (g && g.units.length)
+      ? g.units.map((u) => `<div class="bank-unit-row ${u.id === mgmtUnitId ? "selected" : ""}" data-bu="${u.id}">
+          <span class="bu-name">${u.name}<small style="color:var(--ink-3)"> · ${u.title || ""}</small></span>
+          <span class="bu-meta">${u.words.length} 词</span>
+        </div>`).join("")
+      : '<div class="bank-empty">该年级还没有单元，点「➕ 新增单元」创建</div>';
+    uBox.querySelectorAll(".bank-unit-row").forEach((r) => r.addEventListener("click", () => {
+      mgmtUnitId = r.dataset.bu;
+      selUnitId = mgmtUnitId; curUnitId = mgmtUnitId;
+      carryUiSel();
+      renderBankMgmt(); renderAiTarget(); renderUnitTabs(); renderWordList();
+    }));
+  }
+
+  // 年级 CRUD
+  $("#addGradeBtn")?.addEventListener("click", () => {
+    const name = prompt("新年级名称（如：七年级上）");
+    if (!name || !name.trim()) return;
+    bank.grades.push({ id: "g" + uid(), name: name.trim(), units: [{ id: "u" + uid(), name: "Unit 1", title: "", words: [] }] });
+    mgmtGradeId = bank.grades[bank.grades.length - 1].id;
+    mgmtUnitId = bank.grades[bank.grades.length - 1].units[0].id;
+    selGradeId = mgmtGradeId; selUnitId = mgmtUnitId;
+    curGradeId = mgmtGradeId; curUnitId = mgmtUnitId;
+    saveBank(); refreshAll(); toast("✅ 已新增年级：" + name.trim());
+  });
+  $("#renameGradeBtn")?.addEventListener("click", () => {
+    const g = gradeOf(mgmtGradeId);
+    if (!g) return;
+    const name = prompt("重命名年级为：", g.name);
+    if (name && name.trim()) { g.name = name.trim(); saveBank(); refreshAll(); toast("✅ 已重命名"); }
+  });
+  $("#delGradeBtn")?.addEventListener("click", () => {
+    const g = gradeOf(mgmtGradeId);
+    if (!g) return;
+    if (!confirm("删除年级「" + g.name + "」及其全部单元与单词？")) return;
+    bank.grades = bank.grades.filter((x) => x.id !== mgmtGradeId);
+    mgmtGradeId = bank.grades.length ? bank.grades[0].id : "";
+    mgmtUnitId = bank.grades.length && bank.grades[0].units.length ? bank.grades[0].units[0].id : "";
+    selGradeId = mgmtGradeId; selUnitId = mgmtUnitId;
+    curGradeId = mgmtGradeId; curUnitId = mgmtUnitId;
+    saveBank(); refreshAll(); toast("🗑️ 已删除年级");
+  });
+
+  // 单元 CRUD
+  $("#addUnitBtn")?.addEventListener("click", () => {
+    const g = gradeOf(mgmtGradeId);
+    if (!g) { toast("请先选择或新增一个年级"); return; }
+    const name = prompt("新单元名称（如：Unit 2）：", "Unit " + (g.units.length + 1));
+    const title = prompt("单元标题（如：My Family，可留空）：", "");
+    if (!name || !name.trim()) return;
+    g.units.push({ id: "u" + uid(), name: name.trim(), title: (title || "").trim(), words: [] });
+    mgmtUnitId = g.units[g.units.length - 1].id;
+    selUnitId = mgmtUnitId; curUnitId = mgmtUnitId;
+    carryUiSel();
+    saveBank(); refreshAll(); toast("✅ 已新增单元：" + name.trim());
+  });
+  $("#renameUnitBtn")?.addEventListener("click", () => {
+    const g = gradeOf(mgmtGradeId), u = unitOf(mgmtGradeId, mgmtUnitId);
+    if (!g || !u) return;
+    const name = prompt("重命名单元为：", u.name);
+    const title = prompt("单元标题为（可留空）：", u.title || "");
+    if (name && name.trim()) { u.name = name.trim(); }
+    if (title !== null) u.title = title.trim();
+    saveBank(); refreshAll(); toast("✅ 已更新单元");
+  });
+  $("#delUnitBtn")?.addEventListener("click", () => {
+    const g = gradeOf(mgmtGradeId), u = unitOf(mgmtGradeId, mgmtUnitId);
+    if (!g || !u) return;
+    if (!confirm("删除单元「" + u.name + "」及其全部单词？")) return;
+    g.units = g.units.filter((x) => x.id !== mgmtUnitId);
+    mgmtUnitId = g.units.length ? g.units[0].id : "";
+    selUnitId = mgmtUnitId; curUnitId = mgmtUnitId;
+    carryUiSel();
+    saveBank(); refreshAll(); toast("🗑️ 已删除单元");
+  });
+
   /* ---------- 初始化 ---------- */
+  renderUnitProgress();
+  renderGradeTabs();
+  renderUnitTabs();
   renderWordList();
+  renderWb();
+  renderBankMgmt();
+  renderAiTarget();
+  carryUiSel();
+  refreshMemQueue();
+  nextMemCard();
   showCard(0);
 })();
