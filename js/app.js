@@ -585,14 +585,14 @@
   function clearAiGenError() { $("#aiGenError")?.classList.add("hidden"); }
 
   $("#addWordBtn")?.addEventListener("click", () => {
-    go("settings");
+    go("bank");
     $("#aiForm").classList.add("hidden");
     clearAiGenError();
     $("#aiWordInput").value = "";
     $("#aiWordInput").focus();
   });
   $("#addWordCardBtn")?.addEventListener("click", () => {
-    go("settings");
+    go("bank");
     $("#aiForm").classList.add("hidden");
     clearAiGenError();
     $("#aiWordInput").value = "";
@@ -603,8 +603,7 @@
     if (!w) { toast("请先输入一个单词 ✍️"); return; }
     if (!window.WordsAI) { toast("AI 客户端未加载，请刷新页面"); return; }
     if (!WordsAI.isConfigured()) {
-      showAiGenError("请先在上方「AI 配置」填写 Base URL 与 API Key 并保存。", "Agnes 默认已填好 Base URL 与模型名，只需粘贴你的 API Key。");
-      go("settings");
+      showAiGenError("请先在「设置 → AI 配置」填写并保存 Base URL 与 API Key。", "Agnes 默认已填好 Base URL 与模型名，只需粘贴你的 API Key。");
       return;
     }
     $("#aiGen").disabled = true;
@@ -709,16 +708,13 @@
     a.click();
     toast("📄 学习数据已导出");
   });
-  $("#resetData")?.addEventListener("click", () => {
-    if (confirm("确定要恢复为默认示例词库吗？当前词库与进度将被覆盖。")) {
-      bank = defaultBank();
-      curGradeId = bank.grades[0].id;
-      curUnitId = bank.grades[0].units[0].id;
-      curIdx = 0;
-      saveBank();
-      renderUnitProgress(); renderGradeTabs(); renderUnitTabs(); renderWordList(); renderWb();
-      renderBankMgmt(); renderAiTarget();
-      toast("⚠️ 已恢复默认词库");
+  $("#wipeData")?.addEventListener("click", () => {
+    const keys = Object.keys(localStorage).filter((k) => k.indexOf("wup_") === 0);
+    const msg = "确定要【清空系统数据】吗？\n\n以下数据将全部删除：\n· 词库（预设示例 + 导入 + 手动添加的全部单词、年级、单元）\n· 学习进度（掌握状态、正确率、错词本、打卡、成就）\n· AI 配置（Base URL / API Key / 模型）\n\n清空后页面将完全恢复到初始状态，此操作不可恢复！";
+    if (confirm(msg)) {
+      keys.forEach((k) => localStorage.removeItem(k));
+      toast("🧹 正在清空系统数据…");
+      setTimeout(() => location.reload(), 500);
     }
   });
 

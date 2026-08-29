@@ -36,6 +36,7 @@
       <button class="nav-item" data-view="dictation">🎧 听写</button>
       <button class="nav-item" data-view="wrongbook">📕 错词本</button>
       <button class="nav-item" data-view="stats">📊 统计</button>
+      <button class="nav-item" data-view="bank">📚 词库</button>
       <button class="nav-item" data-view="settings">⚙️ 设置</button>
     </nav>
 
@@ -418,19 +419,19 @@
     </div>
   </section>
 
-  <!-- ================= 视图：设置 ================= -->
-  <section class="view" id="view-settings" data-title="设置">
+  <!-- ================= 视图：词库管理 ================= -->
+  <section class="view" id="view-bank" data-title="词库管理">
     <div class="view-head">
       <div>
-        <p class="eyebrow">⚙️ 设置 · 词库与 AI</p>
-        <h1>设置</h1>
-        <p class="sub">词库导入、发音引擎、AI 配置与数据管理。</p>
+        <p class="eyebrow">📚 词库管理 · 导入与维护</p>
+        <h1>词库管理</h1>
+        <p class="sub">导入/载入词库、管理年级与单元、手动添加单词（AI 自动补全）。</p>
       </div>
     </div>
 
     <div class="settings-grid">
       <div class="card">
-        <div class="card-head"><h2>📦 词库管理</h2></div>
+        <div class="card-head"><h2>📦 词库导入</h2></div>
         <p class="sub">支持导入 JSON 词库（老师/家长可自行维护），或使用内置示例词库。</p>
         <div class="dropzone" id="dropzone">
           <span class="dz-emoji">📥</span>
@@ -440,7 +441,6 @@
         <input type="file" id="jsonFile" accept="application/json,.json" hidden>
         <div class="btn-row">
           <button class="btn btn-soft" id="loadSample">✨ 载入示例词库</button>
-          <button class="btn btn-mint" id="addWordBtn">➕ 添加单词（AI 生成）</button>
         </div>
         <div class="import-status" id="importStatus"></div>
 
@@ -458,35 +458,61 @@
           <button class="btn btn-ghost btn-sm" id="renameUnitBtn">✏️ 重命名当前单元</button>
           <button class="btn btn-danger btn-sm" id="delUnitBtn">🗑️ 清空/删除当前单元</button>
         </div>
+      </div>
 
-        <div class="card-head mt"><h2>➕ 手动添加单词</h2></div>
-        <p class="sub">选择要加入的年级与单元，再输入单词即可（AI 会自动补全词条信息）。</p>
-        <div class="ai-target-row">
-          <select id="aiGradeSel" class="spell-input"></select>
-          <select id="aiUnitSel" class="spell-input"></select>
-        </div>
-        <div class="ai-add-row">
-          <input class="spell-input" id="aiWordInput" placeholder="输入一个单词，如 umbrella">
-          <button class="btn btn-primary" id="aiGen">🤖 AI 自动生成</button>
-        </div>
-        <div class="ai-gen-error hidden" id="aiGenError"></div>
-        <div class="ai-form hidden" id="aiForm">
-          <label>单词 <input id="fWord" value=""></label>
-          <div class="form-row">
-            <label>音标 <input id="fPhonetic" value=""></label>
-            <label>词性 <input id="fPos" value=""></label>
+      <div class="settings-stack">
+        <div class="card">
+          <div class="card-head"><h2>➕ 手动添加单词</h2></div>
+          <p class="sub">选择要加入的年级与单元，再输入单词即可（AI 会自动补全词条信息）。</p>
+          <div class="ai-target-row">
+            <select id="aiGradeSel" class="spell-input"></select>
+            <select id="aiUnitSel" class="spell-input"></select>
           </div>
-          <label>中文释义 <input id="fMeaning" value=""></label>
-          <label>例句 <input id="fExample" value=""></label>
-          <label>例句中文 <input id="fExampleCn" value=""></label>
-          <p class="ai-note">🤖 以上由 AI 生成，请逐项审阅修改后点保存入库</p>
+          <div class="ai-add-row">
+            <input class="spell-input" id="aiWordInput" placeholder="输入一个单词，如 umbrella">
+            <button class="btn btn-primary" id="aiGen">🤖 AI 自动生成</button>
+          </div>
+          <div class="ai-gen-error hidden" id="aiGenError"></div>
+          <div class="ai-form hidden" id="aiForm">
+            <label>单词 <input id="fWord" value=""></label>
+            <div class="form-row">
+              <label>音标 <input id="fPhonetic" value=""></label>
+              <label>词性 <input id="fPos" value=""></label>
+            </div>
+            <label>中文释义 <input id="fMeaning" value=""></label>
+            <label>例句 <input id="fExample" value=""></label>
+            <label>例句中文 <input id="fExampleCn" value=""></label>
+            <p class="ai-note">🤖 以上由 AI 生成，请逐项审阅修改后点保存入库</p>
+            <div class="btn-row">
+              <button class="btn btn-ghost" id="aiRegen">↻ 重新生成</button>
+              <button class="btn btn-primary" id="aiSave">✅ 保存入库</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>➡️ 快速跳转</h2></div>
+          <p class="sub">管理好后去单词本看看效果吧。</p>
           <div class="btn-row">
-            <button class="btn btn-ghost" id="aiRegen">↻ 重新生成</button>
-            <button class="btn btn-primary" id="aiSave">✅ 保存入库</button>
+            <button class="btn btn-mint btn-sm" data-view="cards">📖 去单词本</button>
+            <button class="btn btn-soft btn-sm" data-view="settings">⚙️ 返回设置</button>
           </div>
         </div>
       </div>
+    </div>
+  </section>
 
+  <!-- ================= 视图：设置 ================= -->
+  <section class="view" id="view-settings" data-title="设置">
+    <div class="view-head">
+      <div>
+        <p class="eyebrow">⚙️ 设置 · 发音 / AI / 数据</p>
+        <h1>设置</h1>
+        <p class="sub">发音引擎、AI 配置与数据管理。词库维护已移至独立「词库管理」页面。</p>
+      </div>
+    </div>
+
+    <div class="settings-grid">
       <div class="settings-stack">
         <div class="card">
           <div class="card-head"><h2>🔊 发音引擎</h2></div>
@@ -517,8 +543,9 @@
           <div class="card-head"><h2>🗄️ 数据管理</h2></div>
           <div class="btn-row">
             <button class="btn btn-soft btn-sm" id="exportData">📄 导出学习数据</button>
-            <button class="btn btn-danger btn-sm" id="resetData">⚠️ 重置全部进度</button>
+            <button class="btn btn-danger btn-sm" id="wipeData">🧹 清空系统数据</button>
           </div>
+          <p class="sub" style="margin-top:10px">🧹 清空词库、导入/添加的全部数据、学习进度、打卡成就与 AI 配置，页面完全恢复到初始状态。</p>
         </div>
       </div>
     </div>
@@ -538,6 +565,7 @@
   <button data-view="dictation"><span>🎧</span> 听写</button>
   <button data-view="wrongbook"><span>📕</span> 错词本</button>
   <button data-view="stats"><span>📊</span> 统计</button>
+  <button data-view="bank"><span>📚</span> 词库管理</button>
   <button data-view="settings"><span>⚙️</span> 设置</button>
 </div>
 
