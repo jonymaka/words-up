@@ -198,6 +198,7 @@
     $("#aiExplain").classList.add("hidden");
     $$("#qOptions .option").forEach((b) => b.addEventListener("click", () => checkQuiz(+b.dataset.opt)));
   }
+  let lastWrong = null;   // 最近一次答错记录，供 AI 解析使用
   function checkQuiz(opt) {
     const q = QUIZZES[qIdx % QUIZZES.length];
     const btns = $$("#qOptions .option");
@@ -216,6 +217,11 @@
       fb.querySelector(".fb-wrong").style.display = "block";
       $("#fbAnswer").textContent = q.opts[q.answer].slice(3);
       toast("❌ 已加入错词本");
+      lastWrong = {
+        qText: "选出 " + q.word + " 的中文释义：" + q.opts[q.answer].slice(3),
+        userAnswer: q.opts[opt].slice(3),
+        correctAnswer: q.opts[q.answer].slice(3)
+      };
     }
     $("#qRight").textContent = qRight;
     $("#qWrong").textContent = qWrong;
@@ -229,8 +235,28 @@
     $("#spellCard").classList.toggle("hidden", curQMode !== "spell");
   }));
   $("#aiExplainBtn")?.addEventListener("click", () => {
-    $("#aiExplain").classList.remove("hidden");
-    toast("🤖 AI 已生成错因解析");
+    const el = $("#aiExplain");
+    el.classList.remove("hidden");
+    if (!window.WordsAI) { el.innerHTML = "<p>🤖 AI 客户端未加载，请刷新页面</p>"; return; }
+    if (!lastWrong) { el.innerHTML = "<p>先答错一道题，才能让 AI 帮你解析哦～</p>"; return; }
+    if (!WordsAI.isConfigured()) {
+      el.innerHTML = "<p>⚠️ 请先在「设置 → AI 配置」填写并保存 Base URL 与 API Key。</p>";
+      return;
+    }
+    el.innerHTML = '<p class="ai-load">🤖 AI 正在解析错因…</p>';
+    WordsAI.explainMistake(lastWrong.qText, lastWrong.userAnswer, lastWrong.correctAnswer)
+      .then((text) => {
+        const lines = text.split(/\n/).filter((s) => s.trim());
+        el.innerHTML = lines.map((ln) => {
+          const t = ln.trim();
+          if (/^错因/.test(t)) return "<p><b>" + t.replace(/^错因[：: ]*/, "") + "</b>（错因）</p>";
+          if (/^记忆方法|^记忆/.test(t)) return "<p><b>记忆方法：</b>" + t.replace(/^记忆方法[：: ]*/, "") + "</p>";
+          return "<p>" + t + "</p>";
+        }).join("") || "<p>" + text + "</p>";
+      })
+      .catch((err) => {
+        el.innerHTML = "<p>⚠️ " + (err.message || "AI 解析失败") + "</p>";
+      });
   });
   $("#spellSpeak")?.addEventListener("click", () => speak("friend"));
   $("#spellCheck")?.addEventListener("click", () => {
@@ -328,13 +354,43 @@
   $("#genReport")?.addEventListener("click", () => {
     $("#reportLoading").classList.remove("hidden");
     $("#reportBody").classList.add("hidden");
-    setTimeout(() => {
+    if (!window.WordsAI) {
+      $("#reportLoading").classList.add("hidden");
+      toast("AI 客户端未加载，请刷新页面");
+      return;
+    }
+    if (!WordsAI.isConfigured()) {
+      $("#reportLoading").classList.add("hidden");
+      toast("⚠️ 请先在「设置 → AI 配置」保存 Base URL 与 API Key");
+      return;
+    }
+    const wrongWords = words.filter((w) => w.wrong > 0).map((w) => w.word);
+    WordsAI.generateReport({
+      learned: 320, total: 480, accuracy: 0.82, streak: 7,
+      wrongWords: wrongWords, todayDone: 18, todayGoal: 30
+    }).then((text) => {
       $("#reportLoading").classList.add("hidden");
       $("#reportBody").classList.remove("hidden");
-    }, 900);
+      const lines = text.split(/\n/).map((s) => s.trim()).filter(Boolean);
+      const summary = lines.find((l) => /^总评/.test(l)) || lines[0] || "";
+      const tips = lines.filter((l) => !/^总评/.test(l) && l !== lines[0]).slice(0, 6);
+      $("#reportSummary").innerHTML = "<p><b>" + (summary.replace(/^总评[：: ]*/, "") || text) + "</b></p>";
+      $("#reportTips").innerHTML = tips.map((l) => "<li>" + l.replace(/^[-•-]\s*/, "") + "</li>").join("");
+      const exp = $("#exportReport");
+      exp.classList.remove("hidden");
+      exp.dataset.report = text;
+    }).catch((err) => {
+      $("#reportLoading").classList.add("hidden");
+      toast("⚠️ " + (err.message || "报告生成失败"));
+    });
   });
   $("#exportReport")?.addEventListener("click", () => {
-    const data = { date: new Date().toISOString().slice(0, 10), learned: 320, accuracy: 0.82, streak: 7, wrongWords: ["phone", "goodbye", "family"] };
+    const data = {
+      date: new Date().toISOString().slice(0, 10),
+      report: $("#exportReport").dataset.report || "",
+      learned: 320, accuracy: 0.82, streak: 7,
+      wrongWords: words.filter((w) => w.wrong > 0).map((w) => w.word)
+    };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -402,49 +458,73 @@
     toast("✨ 示例词库已载入");
   });
 
-  // AI 词条生成（模拟流程：生成 → 预览 → 保存）
+  // ---------- AI 词条生成（真实调用 OpenAI 兼容接口） ----------
+  function showAiGenError(msg, hint) {
+    const el = $("#aiGenError");
+    el.innerHTML = "<b>⚠️ AI 生成失败</b>" + msg + (hint ? "<br><small>" + hint + "</small>" : "");
+    el.classList.remove("hidden");
+  }
+  function clearAiGenError() { $("#aiGenError")?.classList.add("hidden"); }
+
   $("#addWordBtn")?.addEventListener("click", () => {
     go("settings");
     $("#aiForm").classList.add("hidden");
+    clearAiGenError();
     $("#aiWordInput").value = "";
     $("#aiWordInput").focus();
   });
   $("#addWordCardBtn")?.addEventListener("click", () => {
     go("settings");
     $("#aiForm").classList.add("hidden");
+    clearAiGenError();
     $("#aiWordInput").value = "";
     $("#aiWordInput").focus();
   });
-  $("#aiGen")?.addEventListener("click", () => {
+  const genWord = () => {
     const w = $("#aiWordInput").value.trim();
     if (!w) { toast("请先输入一个单词 ✍️"); return; }
-    toast("🤖 AI 正在生成词条…");
+    if (!window.WordsAI) { toast("AI 客户端未加载，请刷新页面"); return; }
+    if (!WordsAI.isConfigured()) {
+      showAiGenError("请先在上方「AI 配置」填写 Base URL 与 API Key 并保存。", "Agnes 默认已填好 Base URL 与模型名，只需粘贴你的 API Key。");
+      go("settings");
+      return;
+    }
     $("#aiGen").disabled = true;
-    setTimeout(() => {
-      // 模拟 AI 返回（正式版将调用 OpenAI 兼容接口并强制 JSON 解析）
-      const fake = {
-        umbrella:  { phonetic: "/ʌmˈbrelə/", pos: "n.", meaning: "雨伞；伞", example: "Take an umbrella with you.", exampleCn: "随身带把伞吧。" },
-        happy:     { phonetic: "/ˈhæpi/", pos: "adj.", meaning: "快乐的；开心的", example: "I am very happy today.", exampleCn: "我今天很开心。" },
-        library:   { phonetic: "/ˈlaɪbrəri/", pos: "n.", meaning: "图书馆；书库", example: "We read in the library.", exampleCn: "我们在图书馆看书。" }
-      };
-      const f = fake[w.toLowerCase()] || { phonetic: "/?/", pos: "n.", meaning: "（示例释义，正式版由 AI 生成）", example: "Example sentence.", exampleCn: "示例翻译。" };
-      $("#fWord").value = w;
-      $("#fPhonetic").value = f.phonetic;
-      $("#fPos").value = f.pos;
-      $("#fMeaning").value = f.meaning;
-      $("#fExample").value = f.example;
-      $("#fExampleCn").value = f.exampleCn;
-      $("#aiForm").classList.remove("hidden");
-      $("#aiGen").disabled = false;
-    }, 1000);
+    $("#aiGen").textContent = "⏳ 生成中…";
+    clearAiGenError();
+    WordsAI.generateWord(w)
+      .then((f) => {
+        $("#fWord").value = f.word;
+        $("#fPhonetic").value = f.phonetic;
+        $("#fPos").value = f.pos;
+        $("#fMeaning").value = f.meaning;
+        $("#fExample").value = f.example;
+        $("#fExampleCn").value = f.exampleCn;
+        $("#aiForm").classList.remove("hidden");
+        $("#aiGenError").classList.add("hidden");
+        toast("🤖 AI 已生成 " + f.word + "，请审阅后保存");
+      })
+      .catch((err) => {
+        showAiGenError(err.message || "未知错误", err.hint || "");
+      })
+      .finally(() => {
+        $("#aiGen").disabled = false;
+        $("#aiGen").textContent = "🤖 AI 自动生成";
+      });
+  };
+  $("#aiGen")?.addEventListener("click", genWord);
+  $("#aiRegen")?.addEventListener("click", () => {
+    $("#aiForm").classList.add("hidden");
+    genWord();
   });
-  $("#aiRegen")?.addEventListener("click", () => $("#aiGen").click());
+  const POS_CN = { "n.": "名词", "v.": "动词", "adj.": "形容词", "adv.": "副词", "prep.": "介词", "conj.": "连词", "pron.": "代词", "int.": "感叹词", "num.": "数词", "art.": "冠词" };
   $("#aiSave")?.addEventListener("click", () => {
     const w = $("#fWord").value.trim();
     if (!w) { toast("单词不能为空"); return; }
+    const pos = $("#fPos").value.trim();
     words.unshift({
       word: w, phonetic: $("#fPhonetic").value.trim(),
-      pos: $("#fPos").value.trim(), posCn: "名词",
+      pos: pos, posCn: POS_CN[pos] || "其他",
       meaning: $("#fMeaning").value.trim(),
       example: $("#fExample").value.trim(), exampleCn: $("#fExampleCn").value.trim(),
       state: "new", wrong: 0
@@ -455,16 +535,47 @@
     toast("✅ 已保存入库：" + w);
   });
 
-  // AI 配置
-  $("#aiSaveCfg")?.addEventListener("click", () => toast("💾 AI 配置已保存（原型演示）"));
+  // ---------- AI 配置：读取 / 保存 / 连接自检（真实） ----------
+  function loadAiForm() {
+    const c = window.WordsAI ? WordsAI.loadConfig() : null;
+    if (!c) return;
+    $("#aiBase").value = c.baseUrl;
+    $("#aiKey").value = c.apiKey;
+    $("#aiModel").value = c.model;
+  }
+  loadAiForm();
+  $("#aiSaveCfg")?.addEventListener("click", () => {
+    if (!window.WordsAI) { toast("AI 客户端未加载，请刷新页面"); return; }
+    WordsAI.saveConfig({
+      baseUrl: $("#aiBase").value.trim(),
+      apiKey: $("#aiKey").value.trim(),
+      model: $("#aiModel").value.trim()
+    });
+    const st = $("#aiTestStatus");
+    st.className = "ai-test-status ok";
+    st.textContent = "💾 配置已保存到本机浏览器（localStorage）";
+    toast("💾 AI 配置已保存");
+  });
   $("#aiTestCfg")?.addEventListener("click", () => {
+    if (!window.WordsAI) { toast("AI 客户端未加载，请刷新页面"); return; }
+    WordsAI.saveConfig({
+      baseUrl: $("#aiBase").value.trim(),
+      apiKey: $("#aiKey").value.trim(),
+      model: $("#aiModel").value.trim()
+    });
     const el = $("#aiTestStatus");
     el.className = "ai-test-status";
     el.textContent = "🔌 正在检测连接…";
-    setTimeout(() => {
-      el.className = "ai-test-status ok";
-      el.textContent = "✅ 连接成功！延迟 320ms（原型演示，正式版将真实请求 /chat/completions）";
-    }, 900);
+    el.classList.remove("hidden");
+    WordsAI.selfTest()
+      .then((info) => {
+        el.className = "ai-test-status ok";
+        el.textContent = "✅ 连接成功！模型 " + info.model + " 延迟 " + info.ms + "ms，回复：「" + info.reply + "」";
+      })
+      .catch((err) => {
+        el.className = "ai-test-status err";
+        el.textContent = (err.message || "检测失败") + (err.hint ? " " + err.hint : "");
+      });
   });
 
   // 数据管理

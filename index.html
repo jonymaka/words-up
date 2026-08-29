@@ -434,15 +434,9 @@
       </div>
       <div class="report-loading hidden" id="reportLoading">⏳ AI 正在分析你的学习数据…</div>
       <div class="report-body hidden" id="reportBody">
-        <div class="report-summary">
-          <p><b>总体评价：</b>坚持得很好！连续 7 天打卡，平均正确率 82%，已超过本班 75% 的同学 👍</p>
-        </div>
-        <ul class="tip-list">
-          <li><b>✅ 强项：</b>Unit 1 词汇掌握扎实</li>
-          <li><b>⚠️ 薄弱点：</b>「phone / friend」两组易混词错误率偏高</li>
-          <li><b>💡 建议：</b>每天睡前花 5 分钟重练错词本；Unit 2 建议本周内完成首轮学习</li>
-        </ul>
-        <button class="btn btn-soft btn-sm" id="exportReport">📄 导出学习报告（给家长/老师）</button>
+        <div class="report-summary" id="reportSummary"></div>
+        <ul class="tip-list" id="reportTips"></ul>
+        <button class="btn btn-soft btn-sm hidden" id="exportReport">📄 导出学习报告（给家长/老师）</button>
       </div>
     </div>
   </section>
@@ -478,6 +472,7 @@
           <input class="spell-input" id="aiWordInput" placeholder="输入一个单词，如 umbrella">
           <button class="btn btn-primary" id="aiGen">🤖 AI 自动生成</button>
         </div>
+        <div class="ai-gen-error hidden" id="aiGenError"></div>
         <div class="ai-form hidden" id="aiForm">
           <label>单词 <input id="fWord" value=""></label>
           <div class="form-row">
@@ -510,15 +505,15 @@
 
         <div class="card">
           <div class="card-head"><h2>🤖 AI 配置</h2></div>
-          <label>Base URL <input id="aiBase" placeholder="https://api.deepseek.com/v1"></label>
-          <label>API Key <input id="aiKey" type="password" placeholder="sk-…" autocomplete="off"></label>
-          <label>模型 <input id="aiModel" value="deepseek-chat"></label>
+          <label>Base URL <input id="aiBase" value="https://api.agnes-ai.cn/v1"></label>
+          <label>API Key <input id="aiKey" type="password" placeholder="粘贴你的 Agnes API Key" autocomplete="off"></label>
+          <label>模型 <input id="aiModel" value="agnes-2.5-flash"></label>
           <div class="btn-row">
             <button class="btn btn-soft btn-sm" id="aiSaveCfg">💾 保存配置</button>
             <button class="btn btn-mint btn-sm" id="aiTestCfg">🔌 连接自检</button>
           </div>
           <div class="ai-test-status hidden" id="aiTestStatus"></div>
-          <p class="ai-note">兼容 OpenAI 格式：DeepSeek / OpenAI / 通义 / 智谱 等均可。</p>
+          <p class="ai-note">已适配 Agnes 2.5 Flash（默认配置，支持浏览器直连 CORS ✅）；也兼容 DeepSeek / OpenAI / 通义 / 智谱等 OpenAI 格式服务。<br>Key 仅保存在你的浏览器（localStorage），不会上传。</p>
         </div>
 
         <div class="card">
@@ -552,6 +547,7 @@
 <!-- 全局提示 -->
 <div class="toast" id="toast"></div>
 
+<script src="js/ai.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
