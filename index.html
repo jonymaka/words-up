@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Words Up · 初中英语词汇学习</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<!-- ======= 背景装饰：漂浮气泡 + 圆点纸纹 ======= -->
+<div class="bg-decor" aria-hidden="true">
+  <span class="blob blob-coral"></span>
+  <span class="blob blob-mint"></span>
+  <span class="blob blob-sky"></span>
+  <span class="blob blob-sun"></span>
+</div>
+
+<!-- ======= 顶栏 ======= -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="brand" data-view="dashboard" aria-label="回到首页">
+      <span class="brand-mark">⚡</span>
+      <span class="brand-text">Words Up<small>初中英语 · 中考词汇</small></span>
+    </button>
+
+    <nav class="topnav" aria-label="主导航">
+      <button class="nav-item active" data-view="dashboard">🏠 首页</button>
+      <button class="nav-item" data-view="cards">📖 单词本</button>
+      <button class="nav-item" data-view="memorize">🧠 背单词</button>
+      <button class="nav-item" data-view="quiz">✏️ 自测</button>
+      <button class="nav-item" data-view="dictation">🎧 听写</button>
+      <button class="nav-item" data-view="wrongbook">📕 错词本</button>
+      <button class="nav-item" data-view="stats">📊 统计</button>
+      <button class="nav-item" data-view="settings">⚙️ 设置</button>
+    </nav>
+
+    <div class="topbar-right">
+      <button class="streak-chip" data-view="stats" aria-label="连续打卡 7 天">🔥 连续 7 天</button>
+      <div class="mini-ring" style="--p:68" title="整体掌握率 68%"><span>68%</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ================= 视图：首页仪表盘 ================= -->
+  <section class="view active" id="view-dashboard" data-title="首页">
+    <div class="view-head">
+      <div>
+        <p class="eyebrow">8月29日 · 星期五 · 晴☀️</p>
+        <h1>早安，同学！👋 今天也要元气满满地记单词哦</h1>
+      </div>
+    </div>
+
+    <div class="hero">
+      <!-- 今日任务主卡 -->
+      <div class="card hero-main">
+        <div class="hero-greet">
+          <p class="eyebrow">📋 今日任务</p>
+          <div class="task-num"><strong>18</strong><span>/ 30 词</span></div>
+          <div class="bar lg"><i style="width:60%"></i></div>
+          <p class="task-hint">已完成 60% · 还有 12 词等待你挑战 💪</p>
+          <div class="hero-btns">
+            <button class="btn btn-primary" data-view="memorize">▶ 继续背单词</button>
+            <button class="btn btn-soft" data-view="quiz">✏️ 今日自测</button>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="stat-tile">
+            <span class="stat-emoji">🎯</span>
+            <div class="stat-body">
+              <strong>68%</strong><small>掌握率</small>
+            </div>
+          </div>
+          <div class="stat-tile">
+            <span class="stat-emoji">🕐</span>
+            <div class="stat-body">
+              <strong>3</strong><small>待复习</small>
+            </div>
+          </div>
+          <div class="stat-tile">
+            <span class="stat-emoji">📕</span>
+            <div class="stat-body">
+              <strong>12</strong><small>错词本</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 复习提醒侧卡 -->
+      <div class="card review-card">
+        <div class="card-head">
+          <h2>🕐 待复习</h2>
+          <button class="link-btn" data-view="memorize">去复习 →</button>
+        </div>
+        <ul class="rev-list">
+          <li>
+            <span class="rev-word"><b>friend</b><small>/frend/</small></span>
+            <span class="due-chip due-now">已到期</span>
+          </li>
+          <li>
+            <span class="rev-word"><b>phone</b><small>/fəʊn/</small></span>
+            <span class="due-chip due-soon">10分钟后</span>
+          </li>
+          <li>
+            <span class="rev-word"><b>teacher</b><small>/ˈtiːtʃə/</small></span>
+            <span class="due-chip">1天后</span>
+          </li>
+        </ul>
+        <button class="btn btn-mint btn-block" data-view="memorize">⚡ 开始复习</button>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <!-- 单元进度 -->
+      <div class="card">
+        <div class="card-head">
+          <h2>📚 单元进度</h2>
+          <button class="link-btn" data-view="cards">查看单词 →</button>
+        </div>
+        <div class="unit-progress-list">
+          <div class="unit-progress">
+            <div class="up-top"><span class="grade-badge g7">七上</span><span class="up-name">Unit 1 · Making Friends</span><span class="up-rate">60%</span></div>
+            <div class="bar"><i style="width:60%"></i></div>
+            <small>已学 18 / 30 词 · 掌握 85%</small>
+          </div>
+          <div class="unit-progress">
+            <div class="up-top"><span class="grade-badge g7">七上</span><span class="up-name">Unit 2 · School Life</span><span class="up-rate">33%</span></div>
+            <div class="bar"><i style="width:33%"></i></div>
+            <small>已学 10 / 30 词 · 掌握 70%</small>
+          </div>
+          <div class="unit-progress">
+            <div class="up-top"><span class="grade-badge g8">八上</span><span class="up-name">Unit 1 · Vacation</span><span class="up-rate">0%</span></div>
+            <div class="bar"><i style="width:4%"></i></div>
+            <small>尚未开始 · 30 词</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- 打卡与成就 -->
+      <div class="card">
+        <div class="card-head">
+          <h2>🔥 连续打卡</h2>
+          <button class="link-btn" data-view="stats">本月 →</button>
+        </div>
+        <div class="week-strip" id="weekStrip"></div>
+        <div class="badge-strip">
+          <div class="mini-badge earned" title="连续学习 7 天"><span>🔥</span><small>坚持7天</small></div>
+          <div class="mini-badge earned" title="掌握 100 词"><span>💯</span><small>百词斩</small></div>
+          <div class="mini-badge" title="完成 10 次自测"><span>🎯</span><small>神射手</small></div>
+          <div class="mini-badge" title="错词清零一次"><span>🧹</span><small>大扫除</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 视图：单词本 ================= -->
+  <section class="view" id="view-cards" data-title="单词本">
+    <div class="view-head">
+      <div>
+        <p class="eyebrow">📖 单词卡片浏览</p>
+        <h1>单词本</h1>
+        <p class="sub">点击左侧单词，查看音标、释义与例句；可翻页、可随机。</p>
+      </div>
+    </div>
+
+    <div class="cards-layout">
+      <div class="card unit-panel">
+        <div class="seg-tabs" id="gradeTabs">
+          <button class="seg active" data-grade="g7">七年级上</button>
+          <button class="seg" data-grade="g8">八年级上</button>
+        </div>
+        <div class="seg-tabs units" id="unitTabs">
+          <button class="seg active" data-unit="u1">Unit 1</button>
+          <button class="seg" data-unit="u2">Unit 2</button>
+          <button class="seg" data-unit="u3">Unit 3</button>
+        </div>
+        <ul class="word-list" id="wordList"></ul>
+      </div>
+
+      <div class="card view-card" id="viewCard">
+        <div class="vc-top">
+          <span class="vc-index" id="vcIndex">1 / 10</span>
+          <div class="vc-actions">
+            <button class="icon-btn" id="shuffleBtn" title="随机一个词">🔀</button>
+            <button class="btn btn-coral btn-sm" id="addWordCardBtn">➕ 添加单词</button>
+          </div>
+        </div>
+
+        <div class="vc-flip" id="vcFlip">
+          <div class="vc-face vc-front">
+            <button class="speak-btn big" title="播放发音">🔊</button>
+            <h2 class="vc-word" id="vcWord">—</h2>
+            <p class="vc-phonetic" id="vcPhonetic">—</p>
+            <p class="vc-pos" id="vcPos">—</p>
+          </div>
+          <div class="vc-face vc-back">
+            <button class="speak-btn big" title="播放发音">🔊</button>
+            <h2 class="vc-word" id="vcWord2">—</h2>
+            <p class="vc-meaning" id="vcMeaning">—</p>
+            <div class="vc-example">
+              <p id="vcExample">—</p>
+              <span id="vcExampleCn">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="vc-nav">
+          <button class="btn btn-ghost" id="prevCard">← 上一词</button>
+          <button class="btn btn-ghost" id="nextCard">下一词 →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 视图：记忆模式 ================= -->
+  <section class="view" id="view-memorize" data-title="背单词">
+    <div class="view-head">
+      <div>
+        <p class="eyebrow">🧠 记忆模式 · 间隔重复</p>
+        <h1>背单词</h1>
+        <p class="sub">认识 → 自动排入复习队列（10分钟 → 1天 → 3天 → 7天…）；不认识 → 立即重学。</p>
+      </div>
+    </div>
+
+    <div class="mem-layout">
+      <div class="card mem-stage">
+        <div class="mem-status">
+          <span class="mem-chip">今日目标 <b>30</b></span>
+          <span class="mem-chip done">已完成 <b>12</b></span>
+          <div class="bar lg"><i style="width:40%"></i></div>
+        </div>
+
+        <div class="mem-card" id="memCard">
+          <button class="speak-btn xl" title="播放发音">🔊</button>
+          <h2 class="mem-word" id="memWord">friend</h2>
+          <p class="mem-phonetic" id="memPhonetic">/frend/</p>
+          <div class="mem-reveal" id="memReveal">
+            <p class="vc-pos">n. 名词</p>
+            <p class="mem-meaning">朋友；友人</p>
+            <div class="vc-example"><p>My friend is from China.</p><span>我的朋友来自中国。</span></div>
+          </div>
+          <button class="btn btn-soft" id="revealBtn">💡 先看看答案</button>
+        </div>
+
+        <div class="mem-actions" id="memActions">
+          <button class="btn btn-forget" id="forgetBtn">😵 不认识</button>
+          <button class="btn btn-know" id="knowBtn">✨ 认识！</button>
+        </div>
+
+        <div class="mem-complete hidden" id="memComplete">
+          <div class="complete-emoji">🎉</div>
+          <h3>太棒了！本组完成</h3>
+          <p>学会了 12 个词 · 正确率 91%</p>
+          <button class="btn btn-primary" id="memAgainBtn">↻ 再来一组</button>
+        </div>
+      </div>
+
+      <aside class="card mem-aside">
+        <h3>🧠 记忆小贴士</h3>
+        <ul class="tip-list">
+          <li>👀 先看单词，回忆释义，再点答案验证</li>
+          <li>🔁 忘记很正常，隔几分钟再巩固一次</li>
+          <li>📅 每天坚持 10 分钟，胜过周末突击 2 小时</li>
+        </ul>
+        <div class="spacing-demo">
+          <span>10分钟</span><i>→</i><span>1天</span><i>→</i><span>3天</span><i>→</i><span>7天</span><i>→</i><span>14天</span>
+        </div>
+        <p class="tip-foot">间隔重复（Spaced Repetition）已被科学证明最有效 ✅</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ================= 视图：自测练习 ================= -->
+  <section class="view" id="view-quiz" data-title="自测">
+    <div class="view-head">
+      <div>
+        <p class="eyebrow">✏️ 自测练习 · 即时判分</p>
+        <h1>自测练习</h1>
+        <p class="sub">选择题 / 拼写题，答错自动进入错词本。</p>
+      </div>
+    </div>
+
+    <div class="quiz-wrap">
+      <div class="quiz-modes" id="quizModes">
+        <button class="seg active" data-qmode="en2cn">英译中</button>
+        <button class="seg" data-qmode="cn2en">中译英</button>
+        <button class="seg" data-qmode="spell">拼写题</button>
+      </div>
+
+      <div class="card quiz-card" id="quizCard">
+        <div class="quiz-top">
+          <span class="quiz-progress">第 <b id="qNum">3</b> / 10 题</span>
+          <span class="quiz-score">✅ <b id="qRight">2</b> · ❌ <b id="qWrong">0</b></span>
+          <div class="bar"><i style="width:30%" id="qBar"></i></div>
+        </div>
+
+        <div class="quiz-q" id="quizQ">
+          <p class="q-label" id="qLabel">选出与下列单词对应的中文释义：</p>
+          <h2 class="q-word" id="qWord">friend <button class="speak-btn" id="qSpeak">🔊</button></h2>
+          <div class="options" id="qOptions">
+            <button class="option" data-opt="0">A. 老师</button>
+            <button class="option" data-opt="1">B. 朋友</button>
+            <button class="option" data-opt="2">C. 电话</button>
+            <button class="option" data-opt="3">D. 名字</button>
+          </div>
+        </div>
+
+        <div class="quiz-fb hidden" id="quizFb">
+          <p class="fb-correct">🎉 答对啦！继续加油！</p>
+          <p class="fb-wrong">❌ 正确答案是 <b id="fbAnswer">朋友</b>。已加入错词本 📕</p>
+          <button class="btn btn-soft" id="aiExplainBtn">🤖 AI 解析错因</button>
+          <div class="ai-explain hidden" id="aiExplain">
+            <p><b>错因分析：</b>「friend」与「name」都以辅音开头、结尾相近，容易记混。</p>
+            <p><b>记忆方法：</b>谐音联想「弗润德」→ 待你如朋友般滋润；多做 <em>friend ↔ 朋友</em> 双向配对练习。</p>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="quizNext">下一题 →</button>
+      </div>
+
+      <div class="card spell-card hidden" id="spellCard">
+        <p class="q-label">听发音或看释义，写出单词：</p>
+        <h2 class="q-word" id="spellMeaning">朋友 <button class="speak-btn" id="spellSpeak">🔊</button></h2>
+        <input class="spell-input" id="spellInput" placeholder="输入英文单词…" autocomplete="off">
+        <button class="btn btn-primary btn-block" id="spellCheck">检查 ✏️</button>
+        <div class="quiz-fb hidden" id="spellFb"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 视图：听写 ================= -->
+  <section class="view" id="view-dictation" data-title="听写">
+    <div class="view-head">
+      <div>
+        <p class="eyebrow">🎧 听写模式 · 听发音写单词</p>
+        <h1>听写</h1>
+        <p class="sub">播放发音 → 写下你听到的单词 → 即时判分。可调节语速。</p>
+      </div>
+    </div>
+
+    <div class="card dict-card">
+      <div class="dict-top">
+        <span class="quiz-progress">第 <b id="dictNum">3</b> / 20 词</span>
+        <div class="dict-speed">
+          <span class="speed-label">语速</span>
+          <button class="seg active" data-speed="0.6">慢</button>
+          <button class="seg" data-speed="0.9">中</button>
+          <button class="seg" data-speed="1.1">快</button>
+        </div>
+      </div>
+
+      <div class="dict-stage" id="dictStage">
+        <button class="speak-btn xl dict-play" id="dictPlay">🔊</button>
+        <p class="dict-tip">点击喇叭播放发音，可重复播放</p>
+        <input class="spell-input" id="dictInput" placeholder="写下你听到的单词…" autocomplete="off">
+        <div class="dict-actions">
+          <button class="btn btn-ghost" id="dictReplay">↻ 重听</button>
+          <button class="btn btn-primary" id="dictCheck">检查 ✓</button>
+        </div>
+        <div class="quiz-fb hidden" id="dictFb"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 视图：错词本 ================= -->
+  <section class="view" id="view-wrongbook" data-title="错词本">
+    <div class="view-head">
+      <div>
+        <p class="eyebrow">📕 错词本 · 集中攻克</p>
+        <h1>错词本</h1>
+        <p class="sub">各环节错词自动汇总，一键重练，可手动移除。</p>
+      </div>
+    </div>
+
+    <div class="wb-head">
+      <div class="card wb-stat">
+        <span class="stat-emoji">📕</span>
+        <div class="stat-body"><strong id="wbTotal">12</strong><small>全部错词</small></div>
+      </div>
+      <div class="card wb-stat">
+        <span class="stat-emoji">🆕</span>
+        <div class="stat-body"><strong>3</strong><small>今日新增</small></div>
+      </div>
+      <div class="card wb-cta">
+        <button class="btn btn-coral btn-block" id="retrainAll">⚡ 一键重练错词</button>
+        <p>将按错词复习队列开始，共 12 词</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <ul class="wb-list" id="wbList"></ul>
+    </div>
+  </section>
+
+  <!-- ================= 视图：统计 ================= -->
+  <section class="view" id="view-stats" data-title="统计">
+    <div class="view-head">
+      <div>
+        <p class="eyebrow">📊 学习统计 · 打卡成就</p>
+        <h1>统计与激励</h1>
+        <p class="sub">掌握率、打卡日历、成就徽章，还有 AI 学情报告。</p>
+      </div>
+    </div>
+
+    <div class="stats-overview">
+      <div class="card stat-tile-lg"><span class="stat-emoji">📚</span><div class="stat-body"><strong>320</strong><small>已学单词 / 480</small></div></div>
+      <div class="card stat-tile-lg"><span class="stat-emoji">🎯</span><div class="stat-body"><strong>82%</strong><small>平均正确率</small></div></div>
+      <div class="card stat-tile-lg"><span class="stat-emoji">🔥</span><div class="stat-body"><strong>7</strong><small>连续打卡天数</small></div></div>
+      <div class="card stat-tile-lg"><span class="stat-emoji">⏱️</span><div class="stat-body"><strong>26</strong><small>今日已学 / 30</small></div></div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="card">
+        <div class="card-head"><h2>📅 本月打卡</h2></div>
+        <div class="cal-month" id="calMonth"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>🏅 成就徽章</h2></div>
+        <div class="badge-grid" id="badgeGrid"></div>
+      </div>
+    </div>
+
+    <div class="card ai-report">
+      <div class="card-head">
+        <h2>🤖 AI 学情分析报告</h2>
+        <button class="btn btn-primary btn-sm" id="genReport">生成报告</button>
+      </div>
+      <div class="report-loading hidden" id="reportLoading">⏳ AI 正在分析你的学习数据…</div>
+      <div class="report-body hidden" id="reportBody">
+        <div class="report-summary">
+          <p><b>总体评价：</b>坚持得很好！连续 7 天打卡，平均正确率 82%，已超过本班 75% 的同学 👍</p>
+        </div>
+        <ul class="tip-list">
+          <li><b>✅ 强项：</b>Unit 1 词汇掌握扎实</li>
+          <li><b>⚠️ 薄弱点：</b>「phone / friend」两组易混词错误率偏高</li>
+          <li><b>💡 建议：</b>每天睡前花 5 分钟重练错词本；Unit 2 建议本周内完成首轮学习</li>
+        </ul>
+        <button class="btn btn-soft btn-sm" id="exportReport">📄 导出学习报告（给家长/老师）</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 视图：设置 ================= -->
+  <section class="view" id="view-settings" data-title="设置">
+    <div class="view-head">
+      <div>
+        <p class="eyebrow">⚙️ 设置 · 词库与 AI</p>
+        <h1>设置</h1>
+        <p class="sub">词库导入、发音引擎、AI 配置与数据管理。</p>
+      </div>
+    </div>
+
+    <div class="settings-grid">
+      <div class="card">
+        <div class="card-head"><h2>📦 词库管理</h2></div>
+        <p class="sub">支持导入 JSON 词库（老师/家长可自行维护），或使用内置示例词库。</p>
+        <div class="dropzone" id="dropzone">
+          <span class="dz-emoji">📥</span>
+          <p><b>点击选择或拖拽 JSON 文件</b></p>
+          <p class="dz-sub">格式：{ grades: [ { units: [ { words: [...] } ] } ] }</p>
+        </div>
+        <input type="file" id="jsonFile" accept="application/json,.json" hidden>
+        <div class="btn-row">
+          <button class="btn btn-soft" id="loadSample">✨ 载入示例词库</button>
+          <button class="btn btn-mint" id="addWordBtn">➕ 添加单词（AI 生成）</button>
+        </div>
+        <div class="import-status" id="importStatus"></div>
+
+        <div class="card-head mt"><h2>➕ 手动添加单词</h2></div>
+        <div class="ai-add-row">
+          <input class="spell-input" id="aiWordInput" placeholder="输入一个单词，如 umbrella">
+          <button class="btn btn-primary" id="aiGen">🤖 AI 自动生成</button>
+        </div>
+        <div class="ai-form hidden" id="aiForm">
+          <label>单词 <input id="fWord" value=""></label>
+          <div class="form-row">
+            <label>音标 <input id="fPhonetic" value=""></label>
+            <label>词性 <input id="fPos" value=""></label>
+          </div>
+          <label>中文释义 <input id="fMeaning" value=""></label>
+          <label>例句 <input id="fExample" value=""></label>
+          <label>例句中文 <input id="fExampleCn" value=""></label>
+          <p class="ai-note">🤖 以上由 AI 生成，请逐项审阅修改后点保存入库</p>
+          <div class="btn-row">
+            <button class="btn btn-ghost" id="aiRegen">↻ 重新生成</button>
+            <button class="btn btn-primary" id="aiSave">✅ 保存入库</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-stack">
+        <div class="card">
+          <div class="card-head"><h2>🔊 发音引擎</h2></div>
+          <div class="tts-status" id="ttsStatus">
+            <span class="status-dot">●</span> 检测中…
+          </div>
+          <p class="sub">优先使用微软语音（本地代理 8765 端口），未启动时自动降级为浏览器语音。</p>
+          <div class="btn-row">
+            <button class="btn btn-soft btn-sm" id="ttsCheck">重新检测</button>
+            <button class="btn btn-mint btn-sm" id="ttsTest">🔊 试听一句</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>🤖 AI 配置</h2></div>
+          <label>Base URL <input id="aiBase" placeholder="https://api.deepseek.com/v1"></label>
+          <label>API Key <input id="aiKey" type="password" placeholder="sk-…" autocomplete="off"></label>
+          <label>模型 <input id="aiModel" value="deepseek-chat"></label>
+          <div class="btn-row">
+            <button class="btn btn-soft btn-sm" id="aiSaveCfg">💾 保存配置</button>
+            <button class="btn btn-mint btn-sm" id="aiTestCfg">🔌 连接自检</button>
+          </div>
+          <div class="ai-test-status hidden" id="aiTestStatus"></div>
+          <p class="ai-note">兼容 OpenAI 格式：DeepSeek / OpenAI / 通义 / 智谱 等均可。</p>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>🗄️ 数据管理</h2></div>
+          <div class="btn-row">
+            <button class="btn btn-soft btn-sm" id="exportData">📄 导出学习数据</button>
+            <button class="btn btn-danger btn-sm" id="resetData">⚠️ 重置全部进度</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- 移动端底部导航 -->
+<nav class="bottomnav" aria-label="移动端导航">
+  <button class="bn-item active" data-view="dashboard"><span>🏠</span><small>首页</small></button>
+  <button class="bn-item" data-view="cards"><span>📖</span><small>单词</small></button>
+  <button class="bn-item" data-view="memorize"><span>🧠</span><small>背词</small></button>
+  <button class="bn-item" data-view="quiz"><span>✏️</span><small>自测</small></button>
+  <button class="bn-item" id="moreBtn"><span>⋯</span><small>更多</small></button>
+</nav>
+
+<div class="more-sheet hidden" id="moreSheet">
+  <button data-view="dictation"><span>🎧</span> 听写</button>
+  <button data-view="wrongbook"><span>📕</span> 错词本</button>
+  <button data-view="stats"><span>📊</span> 统计</button>
+  <button data-view="settings"><span>⚙️</span> 设置</button>
+</div>
+
+<!-- 全局提示 -->
+<div class="toast" id="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
