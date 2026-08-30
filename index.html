@@ -53,68 +53,56 @@
   <section class="view active" id="view-dashboard" data-title="首页">
     <div class="view-head">
       <div>
-        <p class="eyebrow">8月29日 · 星期五 · 晴☀️</p>
+        <p class="eyebrow" id="dashDate">—</p>
         <h1>早安，同学！👋 今天也要元气满满地记单词哦</h1>
       </div>
     </div>
 
     <div class="hero">
-      <!-- 今日任务主卡 -->
+      <!-- 今日任务主卡（数据由 app.js 渲染） -->
       <div class="card hero-main">
         <div class="hero-greet">
           <p class="eyebrow">📋 今日任务</p>
-          <div class="task-num"><strong>18</strong><span>/ 30 词</span></div>
-          <div class="bar lg"><i style="width:60%"></i></div>
-          <p class="task-hint">已完成 60% · 还有 12 词等待你挑战 💪</p>
+          <div class="task-num"><strong id="dashDone">0</strong><span id="dashGoal">/ 0 词 · 今日目标</span></div>
+          <div class="bar lg"><i id="dashBar" style="width:0%"></i></div>
+          <p class="task-hint" id="dashHint">词库为空，去「词库管理」导入或添加单词吧 📚</p>
           <div class="hero-btns">
-            <button class="btn btn-primary" data-view="memorize">▶ 继续背单词</button>
-            <button class="btn btn-soft" data-view="quiz">✏️ 今日自测</button>
+            <button class="btn btn-primary" data-view="memorize">▶ 背单词</button>
+            <button class="btn btn-soft" data-view="quiz">✏️ 自测</button>
           </div>
         </div>
         <div class="hero-right">
           <div class="stat-tile">
             <span class="stat-emoji">🎯</span>
             <div class="stat-body">
-              <strong>68%</strong><small>掌握率</small>
+              <strong id="dashMastery">0%</strong><small>掌握率</small>
             </div>
           </div>
           <div class="stat-tile">
             <span class="stat-emoji">🕐</span>
             <div class="stat-body">
-              <strong>3</strong><small>待复习</small>
+              <strong id="dashReview">0</strong><small>待复习</small>
             </div>
           </div>
           <div class="stat-tile">
             <span class="stat-emoji">📕</span>
             <div class="stat-body">
-              <strong>12</strong><small>错词本</small>
+              <strong id="dashWrong">0</strong><small>错词本</small>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 复习提醒侧卡 -->
+      <!-- 复习提醒侧卡（数据由 app.js 渲染） -->
       <div class="card review-card">
         <div class="card-head">
           <h2>🕐 待复习</h2>
           <button class="link-btn" data-view="memorize">去复习 →</button>
         </div>
-        <ul class="rev-list">
-          <li>
-            <span class="rev-word"><b>friend</b><small>/frend/</small></span>
-            <span class="due-chip due-now">已到期</span>
-          </li>
-          <li>
-            <span class="rev-word"><b>phone</b><small>/fəʊn/</small></span>
-            <span class="due-chip due-soon">10分钟后</span>
-          </li>
-          <li>
-            <span class="rev-word"><b>teacher</b><small>/ˈtiːtʃə/</small></span>
-            <span class="due-chip">1天后</span>
-          </li>
-        </ul>
+        <ul class="rev-list" id="revList"></ul>
         <button class="btn btn-mint btn-block" data-view="memorize">⚡ 开始复习</button>
       </div>
+
     </div>
 
     <div class="dash-grid">
@@ -134,12 +122,7 @@
           <button class="link-btn" data-view="stats">本月 →</button>
         </div>
         <div class="week-strip" id="weekStrip"></div>
-        <div class="badge-strip">
-          <div class="mini-badge earned" title="连续学习 7 天"><span>🔥</span><small>坚持7天</small></div>
-          <div class="mini-badge earned" title="掌握 100 词"><span>💯</span><small>百词斩</small></div>
-          <div class="mini-badge" title="完成 10 次自测"><span>🎯</span><small>神射手</small></div>
-          <div class="mini-badge" title="错词清零一次"><span>🧹</span><small>大扫除</small></div>
-        </div>
+        <div class="badge-strip" id="badgeStrip"></div>
       </div>
     </div>
   </section>
@@ -386,12 +369,7 @@
       </div>
     </div>
 
-    <div class="stats-overview">
-      <div class="card stat-tile-lg"><span class="stat-emoji">📚</span><div class="stat-body"><strong>320</strong><small>已学单词 / 480</small></div></div>
-      <div class="card stat-tile-lg"><span class="stat-emoji">🎯</span><div class="stat-body"><strong>82%</strong><small>平均正确率</small></div></div>
-      <div class="card stat-tile-lg"><span class="stat-emoji">🔥</span><div class="stat-body"><strong>7</strong><small>连续打卡天数</small></div></div>
-      <div class="card stat-tile-lg"><span class="stat-emoji">⏱️</span><div class="stat-body"><strong>26</strong><small>今日已学 / 30</small></div></div>
-    </div>
+    <div class="stats-overview" id="statsOverview"></div>
 
     <div class="stats-grid">
       <div class="card">

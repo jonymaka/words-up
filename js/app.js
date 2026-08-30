@@ -18,46 +18,8 @@
   const BANK_KEY = "wup_bank_v1";
 
   function defaultBank() {
-    return {
-      version: 1,
-      name: "我的词库",
-      grades: [
-        {
-          id: "g7", name: "七年级上",
-          units: [
-            { id: "g7u1", name: "Unit 1", title: "Making Friends", words: [
-              { word: "friend",   phonetic: "/frend/",           pos: "n.", posCn: "名词", meaning: "朋友；友人",                  example: "My friend is from China.",        exampleCn: "我的朋友来自中国。",       state: "mastered", wrong: 1 },
-              { word: "phone",    phonetic: "/fəʊn/",            pos: "n.", posCn: "名词", meaning: "电话；手机",                  example: "My phone number is 1234567.",    exampleCn: "我的电话号码是 1234567。",  state: "learning", wrong: 3 },
-              { word: "teacher",  phonetic: "/ˈtiːtʃə(r)/",      pos: "n.", posCn: "名词", meaning: "老师；教师",                  example: "Our English teacher is kind.",    exampleCn: "我们的英语老师很和蔼。",    state: "mastered", wrong: 0 },
-              { word: "name",     phonetic: "/neɪm/",            pos: "n.", posCn: "名词", meaning: "名字；姓名",                  example: "What's your name?",              exampleCn: "你叫什么名字？",             state: "mastered", wrong: 0 },
-              { word: "morning",  phonetic: "/ˈmɔːnɪŋ/",         pos: "n.", posCn: "名词", meaning: "早晨；上午",                  example: "Good morning, class!",           exampleCn: "同学们，早上好！",            state: "learning", wrong: 1 },
-              { word: "afternoon",phonetic: "/ˌɑːftəˈnuːn/",     pos: "n.", posCn: "名词", meaning: "下午",                        example: "We have PE in the afternoon.",    exampleCn: "我们下午上体育课。",          state: "new", wrong: 0 },
-              { word: "hello",    phonetic: "/həˈləʊ/",          pos: "int.", posCn: "感叹词", meaning: "你好",                    example: "Hello, everyone!",               exampleCn: "大家好！",                    state: "mastered", wrong: 0 },
-              { word: "goodbye",  phonetic: "/ˌɡʊdˈbaɪ/",        pos: "int.", posCn: "感叹词", meaning: "再见",                    example: "Goodbye, see you tomorrow.",     exampleCn: "再见，明天见。",              state: "learning", wrong: 2 },
-              { word: "meet",     phonetic: "/miːt/",            pos: "v.", posCn: "动词", meaning: "遇见；结识",                  example: "Nice to meet you.",              exampleCn: "很高兴认识你。",              state: "new", wrong: 0 },
-              { word: "family",   phonetic: "/ˈfæməli/",         pos: "n.", posCn: "名词", meaning: "家；家庭",                    example: "This is my family photo.",       exampleCn: "这是我的全家福。",            state: "new", wrong: 1 }
-            ] },
-            { id: "g7u2", name: "Unit 2", title: "School Life", words: [] }
-          ]
-        },
-        {
-          id: "g8", name: "八年级上",
-          units: [
-            { id: "g8u1", name: "Unit 1", title: "Vacation", words: [] }
-          ]
-        }
-      ]
-    };
+    return { version: 1, name: "我的词库", grades: [] };
   }
-
-  let bank = loadBank();
-  let curGradeId = bank.grades[0] ? bank.grades[0].id : "";
-  let curUnitId = bank.grades[0] && bank.grades[0].units[0] ? bank.grades[0].units[0].id : "";
-  let curIdx = 0;
-  let memQueue = [];
-  let memPos = 0;
-  let memDone = 0;
-
   function loadBank() {
     try {
       const raw = localStorage.getItem(BANK_KEY);
@@ -68,7 +30,72 @@
     } catch (e) {}
     return defaultBank();
   }
+
   function saveBank() { localStorage.setItem(BANK_KEY, JSON.stringify(bank)); }
+
+  let bank = loadBank();
+
+  /* ---------- 学习进度存储（打卡/任务/自测统计） ---------- */
+  const PROG_KEY = "wup_progress_v1";
+  function defaultProgress() {
+    return { dailyGoal: 30, checkIns: [], dailyLearned: {}, quiz: { answered: 0, correct: 0, wrong: 0 }, rounds: 0 };
+  }
+  let progress = loadProgress();
+  function loadProgress() {
+    try {
+      const raw = localStorage.getItem(PROG_KEY);
+      if (raw) {
+        const p = JSON.parse(raw);
+        if (p && typeof p === "object" && typeof p.dailyLearned === "object") return Object.assign(defaultProgress(), p);
+      }
+    } catch (e) {}
+    return defaultProgress();
+  }
+  function saveProgress() { localStorage.setItem(PROG_KEY, JSON.stringify(progress)); }
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function addLearn(n) {
+    const k = todayKey();
+    progress.dailyLearned[k] = (progress.dailyLearned[k] || 0) + (n || 1);
+    if (progress.checkIns.indexOf(k) < 0) progress.checkIns.push(k);
+    progress.checkIns.sort();
+    saveProgress();
+  }
+  function todayLearned() { return progress.dailyLearned[todayKey()] || 0; }
+  function streakDays() {
+    const set = {};
+    progress.checkIns.forEach(function (k) { set[k] = true; });
+    let s = 0;
+    for (let i = 0; ; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const k = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      if (set[k]) s++; else break;
+    }
+    return s;
+  }
+  function masteryRate() {
+    const all = allWords();
+    if (!all.length) return 0;
+    return Math.round(all.filter(function (w) { return w.state !== "new"; }).length / all.length * 100);
+  }
+  function reviewCount() { return allWords().filter(function (w) { return w.state === "learning"; }).length; }
+  function wrongCount() { return allWords().filter(function (w) { return w.wrong > 0; }).length; }
+  function accuracyRate() {
+    const q = progress.quiz;
+    return q.answered ? Math.round(q.correct / q.answered * 100) : 0;
+  }
+
+
+
+  let curGradeId = bank.grades.length ? bank.grades[0].id : "";
+  let curUnitId = bank.grades.length && bank.grades[0].units.length ? bank.grades[0].units[0].id : "";
+  let curIdx = 0;
+  let memQueue = [];
+  let memPos = 0;
+  let memDone = 0;
 
   // 定位辅助
   function gradeOf(id) { return bank.grades.find((g) => g.id === id); }
@@ -103,6 +130,9 @@
     $$(".view").forEach((v) => v.classList.toggle("active", v.id === "view-" + viewId));
     $$("[data-view]").forEach((b) => b.classList.toggle("active", b.dataset.view === viewId));
     $("#moreSheet").classList.add("hidden");
+    if (viewId === "dashboard") { renderDashboard(); }
+    if (viewId === "stats") { renderCalendar(); renderBadges(); renderStatsOverview(); }
+    if (viewId === "wrongbook") { renderWb(); }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   document.addEventListener("click", (e) => {
@@ -129,17 +159,28 @@
     speechSynthesis.speak(u);
   }
 
-  /* ---------- 首页：本周打卡 ---------- */
-  (function renderWeek() {
+  /* ---------- 首页：本周打卡（真实数据） ---------- */
+  function todayKeyOf(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function renderWeek() {
+    const strip = $("#weekStrip");
+    if (!strip) return;
     const days = ["一", "二", "三", "四", "五", "六", "日"];
-    const week = [
-      { done: true }, { done: true }, { done: true }, { done: true },
-      { done: true }, { done: true }, { done: true, today: true }, { tomorrow: true }
-    ];
-    $("#weekStrip").innerHTML = week.map((d, i) =>
-      `<div class="day ${d.done ? "done" : ""} ${d.today ? "today" : ""} ${d.tomorrow ? "tomorrow" : ""}"><span>${days[i]}</span><i>${d.done ? "✓" : (d.today ? "今" : d.tomorrow ? "明" : "")}</i></div>`
-    ).join("");
-  })();
+    const set = {};
+    progress.checkIns.forEach(function (k) { set[k] = true; });
+    const cells = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const k = todayKeyOf(d);
+      const isToday = (i === 0);
+      const done = !!set[k];
+      const idx = (d.getDay() + 6) % 7;
+      cells.push('<div class="day ' + (done ? "done" : "") + (isToday ? " today" : "") + '"><span>' + days[idx] + '</span><i>' + (done ? "✓" : (isToday ? "今" : "")) + '</i></div>');
+    }
+    strip.innerHTML = cells.join("");
+  }
 
   /* ---------- 单词本：从词库动态渲染年级/单元/单词 ---------- */
   function renderGradeTabs() {
@@ -235,10 +276,12 @@
   });
   $("#knowBtn")?.addEventListener("click", () => {
     memDone++;
+    addLearn(1);
     toast("✨ 认识！10 分钟后自动安排复习");
     nextMemCard();
   });
   $("#forgetBtn")?.addEventListener("click", () => {
+    addLearn(1);
     toast("😵 没关系，这个词会立即再学一遍");
     nextMemCard();
   });
@@ -283,11 +326,21 @@
     const fb = $("#quizFb");
     if (opt === q.answer) {
       qRight++;
+      progress.quiz.answered++;
+      progress.quiz.correct++;
+      progress.rounds++;
+      addLearn(1);
+      saveProgress();
       fb.querySelector(".fb-correct").style.display = "block";
       fb.querySelector(".fb-wrong").style.display = "none";
       toast("🎉 答对啦！");
     } else {
       qWrong++;
+      progress.quiz.answered++;
+      progress.quiz.wrong++;
+      progress.rounds++;
+      addLearn(1);
+      saveProgress();
       btns[opt].classList.add("wrong");
       fb.querySelector(".fb-correct").style.display = "none";
       fb.querySelector(".fb-wrong").style.display = "block";
@@ -338,13 +391,19 @@
   $("#spellCheck")?.addEventListener("click", () => {
     const v = $("#spellInput").value.trim().toLowerCase();
     const fb = $("#spellFb");
+    progress.quiz.answered++;
+    addLearn(1);
     if (v === "friend") {
+      progress.quiz.correct++;
       $("#spellInput").classList.add("ok");
       fb.innerHTML = '<p class="fb-correct">🎉 拼写正确！</p>';
     } else {
+      progress.quiz.wrong++;
       $("#spellInput").classList.add("bad");
       fb.innerHTML = '<p class="fb-wrong">❌ 正确答案是 <b>friend</b></p>';
     }
+    progress.rounds++;
+    saveProgress();
     fb.classList.remove("hidden");
   });
   renderQuiz();
@@ -369,13 +428,19 @@
   $("#dictCheck")?.addEventListener("click", () => {
     const v = $("#dictInput").value.trim().toLowerCase();
     const fb = $("#dictFb");
+    progress.quiz.answered++;
+    progress.rounds++;
+    addLearn(1);
     if (v === DICT[dictIdx]) {
+      progress.quiz.correct++;
       $("#dictInput").classList.add("ok");
       fb.innerHTML = '<p class="fb-correct">🎉 写对啦！</p>';
     } else {
+      progress.quiz.wrong++;
       $("#dictInput").classList.add("bad");
-      fb.innerHTML = `<p class="fb-wrong">❌ 正确答案是 <b>${DICT[dictIdx]}</b></p>`;
+      fb.innerHTML = '<p class="fb-wrong">❌ 正确答案是 <b>' + DICT[dictIdx] + '</b></p>';
     }
+    saveProgress();
     fb.classList.remove("hidden");
   });
 
@@ -399,34 +464,113 @@
   $("#retrainAll")?.addEventListener("click", () => go("memorize"));
   renderWb();
 
-  /* ---------- 统计：打卡日历 + 徽章 ---------- */
-  (function renderCalendar() {
+  /* ---------- 统计：打卡日历 + 徽章（真实数据） ---------- */
+  function renderCalendar() {
+    const el = $("#calMonth");
+    if (!el) return;
     const now = new Date();
     const y = now.getFullYear(), m = now.getMonth();
     const first = new Date(y, m, 1);
     const daysInMonth = new Date(y, m + 1, 0).getDate();
-    const lead = first.getDay() === 0 ? 6 : first.getDay() - 1; // 周一为第一天
+    const lead = first.getDay() === 0 ? 6 : first.getDay() - 1;
     const today = now.getDate();
+    const set = {};
+    progress.checkIns.forEach(function (k) { if (k.indexOf(y + "-" + String(m + 1).padStart(2, "0")) === 0) set[k] = true; });
     let cells = '<span class="cal-w">一</span><span class="cal-w">二</span><span class="cal-w">三</span><span class="cal-w">四</span><span class="cal-w">五</span><span class="cal-w">六</span><span class="cal-w">日</span>';
     for (let i = 0; i < lead; i++) cells += '<span class="cal-d empty"></span>';
     for (let d = 1; d <= daysInMonth; d++) {
+      const k = y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
       let cls = "cal-d";
-      if (d < today) cls += " done";
-      if (d <= today && d > today - 7) cls += " streak";
-      if (d === today) cls += " today done";
-      cells += `<span class="${cls}">${d}</span>`;
+      if (set[k]) cls += " done";
+      if (d === today) cls += " today";
+      cells += '<span class="' + cls + '">' + d + '</span>';
     }
-    $("#calMonth").innerHTML = cells;
-  })();
-  (function renderBadges() {
-    const badges = [
-      { e: "🔥", n: "坚持 7 天", on: true }, { e: "💯", n: "百词斩", on: true },
-      { e: "🎯", n: "神射手", on: false }, { e: "🧹", n: "大扫除", on: false },
-      { e: "🌙", n: "夜猫子", on: false }, { e: "🏆", n: "单元冠军", on: false }
+    el.innerHTML = cells;
+  }
+  function renderBadges() {
+    const g = $("#badgeGrid");
+    if (g) {
+      const bd = [
+        { e: "🔥", n: "坚持 7 天", on: streakDays() >= 7 },
+        { e: "💯", n: "百词斩", on: allWords().length >= 100 },
+        { e: "🎯", n: "神射手", on: progress.quiz.answered >= 30 && accuracyRate() >= 80 },
+        { e: "🧹", n: "大扫除", on: progress.quiz.wrong === 0 && progress.quiz.answered >= 10 },
+        { e: "🌙", n: "夜猫子", on: false },
+        { e: "🏆", n: "单元冠军", on: bank.grades.some(function (g2) { return g2.units.some(function (u) { return u.words.length > 0 && u.words.every(function (w) { return w.state === "mastered"; }); }); }) }
+      ];
+      g.innerHTML = bd.map(function (b) {
+        return '<div class="badge-cell ' + (b.on ? "unlocked" : "") + '"><span>' + b.e + '</span><small>' + b.n + '</small></div>';
+      }).join("");
+    }
+    const strip = $("#badgeStrip");
+    if (strip) {
+      const mini = [
+        { e: "🔥", n: "坚持7天", on: streakDays() >= 7 },
+        { e: "💯", n: "百词斩", on: allWords().length >= 100 },
+        { e: "🎯", n: "神射手", on: progress.quiz.answered >= 30 && accuracyRate() >= 80 },
+        { e: "🧹", n: "大扫除", on: progress.quiz.wrong === 0 && progress.quiz.answered >= 10 }
+      ];
+      strip.innerHTML = mini.map(function (b) {
+        return '<div class="mini-badge ' + (b.on ? "earned" : "") + '" title="' + b.n + '"><span>' + b.e + '</span><small>' + b.n + '</small></div>';
+      }).join("");
+    }
+  }
+  /* 统计页总览（真实数据） */
+  function renderStatsOverview() {
+    const el = $("#statsOverview");
+    if (!el) return;
+    const cards = [
+      { e: "📚", v: allWords().length, s: "词库单词总数" },
+      { e: "🎯", v: accuracyRate() + "%", s: "平均正确率" },
+      { e: "🔥", v: streakDays(), s: "连续打卡天数" },
+      { e: "⏱️", v: todayLearned(), s: "今日已学 / " + progress.dailyGoal }
     ];
-    $("#badgeGrid").innerHTML = badges.map((b) =>
-      `<div class="badge-cell ${b.on ? "unlocked" : ""}"><span>${b.e}</span><small>${b.n}</small></div>`).join("");
-  })();
+    el.innerHTML = cards.map(function (c) {
+      return '<div class="card stat-tile-lg"><span class="stat-emoji">' + c.e + '</span><div class="stat-body"><strong>' + c.v + '</strong><small>' + c.s + '</small></div></div>';
+    }).join("");
+  }
+  /* 首页仪表盘（真实数据） */
+  function renderDashboard() {
+    const dd = $("#dashDate");
+    if (dd) {
+      const d = new Date();
+      const wd = ["日","一","二","三","四","五","六"][d.getDay()];
+      dd.textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日 · 星期" + wd + " · 加油☀️";
+    }
+    const done = $("#dashDone"), goal = $("#dashGoal"), bar = $("#dashBar"), hint = $("#dashHint");
+    const mastery = $("#dashMastery"), review = $("#dashReview"), wrong = $("#dashWrong");
+    if (done) {
+      const d = todayLearned();
+      done.textContent = d;
+      goal.textContent = "/ " + progress.dailyGoal + " 词 · 今日目标";
+      if (bar) bar.style.width = Math.min(100, Math.round(d / progress.dailyGoal * 100)) + "%";
+      if (hint) {
+        const all = allWords().length;
+        if (!all) hint.textContent = "词库为空，去「词库管理」导入或添加单词吧 📚";
+        else if (d >= progress.dailyGoal) hint.textContent = "今日目标已达成，太棒了！🎉";
+        else hint.textContent = "已完成 " + Math.round(d / progress.dailyGoal * 100) + "% · 还有 " + (progress.dailyGoal - d) + " 词，加油 💪";
+      }
+    }
+    if (mastery) mastery.textContent = masteryRate() + "%";
+    if (review) review.textContent = reviewCount();
+    if (wrong) wrong.textContent = wrongCount();
+    renderWeek();
+    renderReviewList();
+  }
+  /* 首页待复习列表（真实数据） */
+  function renderReviewList() {
+    const el = $("#revList");
+    if (!el) return;
+    const due = allWords().filter(function (w) { return w.state === "learning" || w.wrong > 0; }).slice(0, 5);
+    if (!due.length) {
+      el.innerHTML = '<li class="bank-empty">暂无待复习单词 🎉</li>';
+      return;
+    }
+    el.innerHTML = due.map(function (w) {
+      return '<li><span class="rev-word"><b>' + w.word + '</b><small>' + w.phonetic + '</small></span><span class="due-chip' + (w.wrong > 0 ? " due-now" : "") + '">' + (w.wrong > 0 ? "已到期" : "复习中") + '</span></li>';
+    }).join("");
+  }
+
   $("#genReport")?.addEventListener("click", () => {
     $("#reportLoading").classList.remove("hidden");
     $("#reportBody").classList.add("hidden");
@@ -710,9 +854,14 @@
   });
   $("#wipeData")?.addEventListener("click", () => {
     const keys = Object.keys(localStorage).filter((k) => k.indexOf("wup_") === 0);
-    const msg = "确定要【清空系统数据】吗？\n\n以下数据将全部删除：\n· 词库（预设示例 + 导入 + 手动添加的全部单词、年级、单元）\n· 学习进度（掌握状态、正确率、错词本、打卡、成就）\n· AI 配置（Base URL / API Key / 模型）\n\n清空后页面将完全恢复到初始状态，此操作不可恢复！";
+    const msg = "确定要【清空系统数据】吗？\n\n以下数据将全部删除：\n· 词库（导入/手动添加的全部单词、年级、单元）\n· 学习进度（掌握状态、正确率、错词本、打卡、成就）\n· AI 配置（Base URL / API Key / 模型）\n· 页面缓存与本地存储\n\n清空后所有数据归 0，页面完全恢复到初始状态，此操作不可恢复！";
     if (confirm(msg)) {
       keys.forEach((k) => localStorage.removeItem(k));
+      try { sessionStorage.clear(); } catch (e) {}
+      try { if (window.indexedDB) indexedDB.deleteDatabase("wup-db"); } catch (e) {}
+      bank = defaultBank();
+      progress = defaultProgress();
+      curGradeId = ""; curUnitId = ""; curIdx = 0;
       toast("🧹 正在清空系统数据…");
       setTimeout(() => location.reload(), 500);
     }
@@ -867,4 +1016,9 @@
   refreshMemQueue();
   nextMemCard();
   showCard(0);
+  renderDashboard();
+  renderWeek();
+  renderBadges();
+  renderCalendar();
+  renderStatsOverview();
 })();
